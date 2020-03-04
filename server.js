@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const PORT = process.env.PORT || 3001;
 const path = require('path');
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/under-the-weather";
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/scheduler";
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
 app.use(express.urlencoded({ extended: true }));
@@ -18,6 +18,7 @@ if (process.env.NODE_ENV === "production") {
 require('./routes/index')(app);
 
 app.get("*", (req, res) => {
+    console.log('nogo')
     res.sendFile(path.join(__dirname, "./client/public/index.html"));
 });
 
