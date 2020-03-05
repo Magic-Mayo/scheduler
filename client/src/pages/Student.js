@@ -1,31 +1,41 @@
 import React, { useState } from 'react';
-import {Link} from 'react-router-dom';
 import axios from 'axios';
+import {Button, Input, Label, Form, Wrapper} from '../components/styledComponents/';
 
-export const Student = () => {
+const Student = () => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState();
 
     const findStudent = (e) => {
         e.preventDefault();
-        console.log(email)
-        axios.get(`/student/${email}`).then(data => {
-            if(!data) return setError('This email does not exist in Bootcamp Spot!  Please check the email address and try again.  If this error persists please contact your instructor or TA for further assistance.');
-            console.log(data)
+        if(!email) return setError('Please enter a valid email address!');
+
+        axios.get(`/student/${email}`).then(res => {
+            if(!res.data) return setError('This email does not exist in Bootcamp Spot!  Please check the email address and try again.  If this error persists please contact your instructor or TA for further assistance.');
+            console.log(res.data)
         })
     }
 
     return (
-        <div className='student-email'>
-            <form onSubmit={findStudent}>
-                <input
+        <Wrapper Width='80vw'>
+            <Form onSubmit={findStudent}>
+                <Label>BCS email address: </Label>
+                <Input
                 type='text'
+                name='email'
                 className='input student-input-email'
                 value={email}
                 placeholder='Enter your Bootcamp Spot email'
-                onChange={(e)=>setEmail(e.target.value)}></input>
-            </form>
-        </div>
+                onChange={(e) => setEmail(e.target.value)}
+                onFocus={() => setError()}
+                />
+                <Button>Submit</Button>
+            </Form>
+            {console.log(error)}
+            {error && 
+                <span className='error'>{error}</span>
+            }
+        </Wrapper>
     )
 }
 
