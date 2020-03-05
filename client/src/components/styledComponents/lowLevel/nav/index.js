@@ -6,7 +6,7 @@ export default styled.nav`
     flex-direction: column;
     left: 0;
     background-color: #ba0c2f;
-    width: ${props => props.width};
+    width: ${props => props.Width};
     height: 100vh;
     padding-right: 10px;
     ${props => props.boxShadow}

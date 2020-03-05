@@ -5,7 +5,7 @@ export default styled.div`
     flex-direction: ${props => props.flexDirection || 'column'};
     justify-content: center;
     align-items: ${props => props.flexDirection ? '' : 'center'};
-    width: ${props => props.width};
-    height: ${props => props.height};
+    width: ${props => props.Width};
+    height: ${props => props.Height};
     margin: 0 auto;
 `

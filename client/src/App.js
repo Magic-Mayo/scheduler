@@ -10,7 +10,7 @@ function App() {
     let location = useLocation();
     console.log(location)
     return (
-        <Wrapper flexDirection='row' width='100vw' height='100vh'>
+        <Wrapper flexDirection='row' Width='100vw' Height='100vh'>
             {location.pathname !== '/' &&
                 <Nav />
             }
