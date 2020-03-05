@@ -1,14 +1,19 @@
 import React from 'react';
-import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
-import './App.scss';
+import {BrowserRouter as Router, Switch, Route, useLocation} from 'react-router-dom';
 import Student from './pages/Student';
 import Admin from './pages/Admin';
 import Home from './components/Home';
+import Nav from './components/Nav';
+import {Wrapper} from './components/styledComponents';
 
 function App() {
-
+    let location = useLocation();
+    console.log(location)
     return (
-        <Router>
+        <Wrapper flexDirection='row' width='100vw' height='100vh'>
+            {location.pathname !== '/' &&
+                <Nav />
+            }
             <Route exact path='/'>
                 <Home />
             </Route>
@@ -20,7 +25,7 @@ function App() {
                     <Student />
                 </Route>
             </Switch>
-        </Router>
+        </Wrapper>
     )
 }
 
