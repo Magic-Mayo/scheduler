@@ -5,7 +5,6 @@ export default styled.div`
     ${props => props.display === 'grid' ? 
     `grid-template-columns: repeat(7, 1fr)`
     : ''};
-    ${props => props.rows ? `` : ''}
     flex-direction: ${props => props.flexDirection || 'column'};
     justify-content: ${props => props.justifyContent || 'center'};
     align-items: ${props => props.alignItems ? props.alignItems : props.flexDirection ? '' : 'center'};
