@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 export default styled.nav`
     display: flex;
+    position:fixed;
     flex-direction: column;
     background-color: #ba0c2f;
     width: ${props => props.Width};
