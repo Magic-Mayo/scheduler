@@ -14,20 +14,7 @@ export default styled(Link)`
         color: #ddd
     }
     
-    &:hover:before {
+    &:hover {
         background-color: #172a55;
     }
-    
-    ${props => props.expanded ?
-        
-        `&:before {
-            content: 'Home';
-            position: absolute;
-            width: 190px;
-            height: 53px;
-        }`
-        :
-        ""
-    }
-
 `;
