@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import {Button, Input, Label, Form, Wrapper} from '../components/styledComponents/';
+import Calendar from '../components/Calendar'
 
 const Student = () => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState();
+    const [user, setUser] = useState();
 
     const findStudent = (e) => {
         e.preventDefault();
@@ -13,11 +15,15 @@ const Student = () => {
         axios.get(`/student/${email}`).then(res => {
             if(!res.data) return setError('This email does not exist in Bootcamp Spot!  Please check the email address and try again.  If this error persists please contact your instructor or TA for further assistance.');
             console.log(res.data)
+            setUser({name: res.data.name, email: res.data.email});
         })
     }
 
     return (
         <Wrapper Width='80vw'>
+            {user ?
+            <Calendar />
+            :
             <Form onSubmit={findStudent}>
                 <Label>BCS email address: </Label>
                 <Input
@@ -31,7 +37,7 @@ const Student = () => {
                 />
                 <Button>Submit</Button>
             </Form>
-            {console.log(error)}
+            }
             {error && 
                 <span className='error'>{error}</span>
             }
