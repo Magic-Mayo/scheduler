@@ -12,13 +12,13 @@ import {
 import { Wrapper, Button } from '../styledComponents';
 
 const days = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday'
+    'Sun',
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat'
 ]
 
 
@@ -46,8 +46,8 @@ const Calendar = () => {
         const days = [];
 
         const startOfMonth = startMonth(selectedMonth);
-        const endOfMonth = endMonth(selectedMonth);
-        const startOfWeek = startWeek(selectedMonth);
+        const endOfMonth = endMonth(startOfMonth);
+        const startOfWeek = startWeek(startOfMonth);
         const endofWeek = endWeek(endOfMonth);
 
         let currentDay = startOfWeek;
