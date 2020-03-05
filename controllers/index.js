@@ -3,7 +3,6 @@ const Schedule = require('../models/Schedule');
 
 module.exports = {
     create: async (req, res) => {
-        console.log('hi')
         let login = await axios({
             url: 'https://bootcampspot.com/api/instructor/v1/login',
             method: 'post',
@@ -45,9 +44,7 @@ module.exports = {
     findOne: (req, res) => {
         console.log(req.body)
         Students.findOne({email: req.params.email}).then(data => {
-            console.log("controller: ", data)
-            if(data) return res.json(data);
-            return res.json(false);
+            res.json(data);
         }).catch(err => {
             console.error(err);
             return res.json(false);
