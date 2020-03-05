@@ -5,9 +5,9 @@ const NavBar = () => {
     const [expanded, setExpanded] = useState(true);
 
     return (
-        <Nav Width={expanded ? '20vw' : '5vw'} boxShadow={expanded ? 'box-shadow: #333 12px 2px 15px;' : ''}>
-            <span onClick={() => setExpanded(!expanded)}>{expanded ? '<' : '>'}</span>
-            <Link to='/' margin='20px 0 0 100px'>
+        <Nav onClick={() => setExpanded(!expanded)} Width={expanded ? '200px' : '50px'} boxShadow={expanded ? 'box-shadow: #333 12px 5px 15px;' : 'box-shadow: #333 3px 5px 15px;'}>
+            <span >{expanded ? '<' : '>'}</span>
+            <Link to='/' margin='0 0 0 80px;' expanded={expanded}>
                 Home
             </Link>
         </Nav>
