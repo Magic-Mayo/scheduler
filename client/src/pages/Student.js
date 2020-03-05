@@ -6,7 +6,7 @@ import Calendar from '../components/Calendar'
 const Student = () => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState();
-    const [user, setUser] = useState();
+    const [user, setUser] = useState(true);
 
     const findStudent = (e) => {
         e.preventDefault();
@@ -20,7 +20,7 @@ const Student = () => {
     }
 
     return (
-        <Wrapper Width='80vw'>
+        <Wrapper Width='100%'>
             {user ?
             <Calendar />
             :
