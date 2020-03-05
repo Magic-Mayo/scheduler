@@ -14,4 +14,8 @@ export default styled.button`
         box-shadow: none;
         border-radius: 7px;
     }
+
+    &:hover {
+        cursor: pointer;
+    }
 `;

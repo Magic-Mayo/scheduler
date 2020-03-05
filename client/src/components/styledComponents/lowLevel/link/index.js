@@ -6,9 +6,28 @@ export default styled(Link)`
     text-decoration: none;
     color: #eee;
     font-size: 25px;
-    margin: ${props => props.margin || '30px 0 0 30px'};
-
+    padding: 10px;
+    margin: ${props => props.margin || '0'};
+    z-index: 1;
+    
     &:active {
         color: #ddd
     }
+    
+    &:hover:before {
+        background-color: #172a55;
+    }
+    
+    ${props => props.expanded ?
+        
+        `&:before {
+            content: 'Home';
+            position: absolute;
+            width: 190px;
+            height: 53px;
+        }`
+        :
+        ""
+    }
+
 `;
