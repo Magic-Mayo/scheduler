@@ -1,9 +1,9 @@
 const controller = require('../controllers')
 
 module.exports = (app) => {
-    
-    app.get('/admin/students', controller.addNewStudents);
+    app.get('/admin/:id/students/', controller.addNewStudents);
     app.get('/student/:email', controller.findOne);
-    app.post('/schedule', controller.schedule);
-    app.get('/availability/:date', controller.getAvailability);
+    app.get('/availability/:date/:id', controller.getAvailability);
+    app.put('/availability/:date/:id', controller.updateAvailability);
+    app.post('/availability/:date/:id', controller.setAvailability);
 }
