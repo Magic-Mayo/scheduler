@@ -20,7 +20,7 @@ const Student = () => {
     }
 
     return (
-        <Wrapper Width='100%'>
+        <Wrapper Width='100%' margin='0 0 0 50px'>
             {user ?
             <Calendar />
             :
