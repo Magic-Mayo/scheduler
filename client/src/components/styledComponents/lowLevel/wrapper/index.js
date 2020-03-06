@@ -18,6 +18,7 @@ export default styled.div`
     border-left: ${props => props.borderLeft || ''};
     border-right: ${props => props.borderRight || ''};
     border-bottom: ${props => props.borderBottom || ''};
+    margin: ${props => props.margin || ''}
 
 
     &.calendar-month {
