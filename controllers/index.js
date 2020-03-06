@@ -1,11 +1,11 @@
 require('dotenv').config()
-const Students = require('../models/Students');
+const Staff = require('../models/Staff');
 const Schedule = require('../models/Schedule');
+const Students = require('../models/Students');
 const axios = require('axios');
 
 module.exports = {
     addNewStudents: async (req, res) => {
-        console.log('new')
         let login = await axios({
             url: 'https://bootcampspot.com/api/instructor/v1/login',
             method: 'post',
@@ -36,9 +36,7 @@ module.exports = {
             email.push({name: `${student.firstName} ${student.lastName}`, email: student.email});
         })
 
-        console.log(email)
-
-        Students.create(email).then(data => {
+        Staff.findOneAndUpdate(req.params.id, {$push: {students: email}}, {new: true}).then(data => {
             return res.json(data)
         }).catch(err => {
             console.error(err)
@@ -55,14 +53,21 @@ module.exports = {
         })
     },
 
-    schedule: (req, res) => {
-        
+    getAvailability: (req,res) => {
+        Schedule.findOne({id: req.params.id, 'date.month': req.params.date}).then(data => {
+            res.json(data);
+        })
     },
 
-    getAvailability: (req,res) => {
-        console.log(req.params.date)
-        Schedule.findOne({'date.month': req.params.date}).then(data => {
-            res.json(data)
+    setAvailability: (req, res) => {
+        Schedule.create(req.body).then(data => {
+            res.json(data);
+        }).catch(err => {
+            res.json(err);
         })
+    },
+
+    updateAvailability: (req, res) => {
+
     }
 }
