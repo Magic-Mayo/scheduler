@@ -9,8 +9,9 @@ import {
     addMonths,
     subMonths
 } from 'date-fns';
-import { Wrapper, Button } from '../styledComponents';
+import { Wrapper, Button, P, Link } from '../styledComponents';
 import axios from 'axios';
+import {useHistory} from 'react-router-dom';
 
 const days = [
     'Sun',
@@ -27,9 +28,11 @@ const Calendar = () => {
     const [calendar, setCalendar] = useState();
     const [selectedMonth, setSelectedMonth] = useState(new Date());
     const [availabilty, setAvailability] = useState();
+    const [dateClicked, setDateClicked] = useState();
+    const history = useHistory();
 
     const dateSelect = e => {
-        
+        setDateClicked(e.target.value);
     }
 
     const getDays = () => {
@@ -58,17 +61,22 @@ const Calendar = () => {
             for(let i = 0; i < 7; i++){
                 numberedDate = dateFormat(currentDay, 'd');
                 days.push(
-                    <Button
-                    calendar
-                    value={dateFormat(currentDay, 'MMMM d, yyyy')}
-                    key={currentDay}
-                    onClick={dateSelect}
-                    color='#000' borderRadius='0'
-                    border='.5px solid #ccc'
-                    Height='100%'
-                    Width='100%'
-                    bgColor='#fff'
-                    >{numberedDate}</Button>
+                    <Link Width='100%' padding='0' to={`/student/${dateFormat(currentDay, 'MMdd')}`}>
+                        <Button
+                        calendar
+                        value={dateFormat(currentDay, 'MMMM d, yyyy')}
+                        key={currentDay}
+                        onClick={dateSelect}
+                        Color='#000'
+                        borderRadius='0'
+                        border='.5px solid #ccc'
+                        Height='100%'
+                        Width='100%'
+                        bgColor='#fff'
+                        display='flex'
+                        justifyContent='flex-end'
+                        >{numberedDate}</Button>
+                    </Link>
                 )
 
                 currentDay = addDays(currentDay, 1);
@@ -81,8 +89,8 @@ const Calendar = () => {
                 Height='100%'
                 gridColumn='1/8'
                 justifyContent='space-between'
-                borderLeft='#000 solid 1px'
-                borderRight='#000 solid 1px'
+                borderLeft='#666 solid 1px'
+                borderRight='#666 solid 1px'
                 >
                     {days.map(day => (
                         day
@@ -99,22 +107,63 @@ const Calendar = () => {
         
     }
 
+    const getTimes = () => {
+        const times = [
+            '09:00am',
+            '10:00am',
+            '11:00am',
+            '12:00pm',
+            '1:00pm',
+            '2:00pm',
+            '3:00pm',
+            '4:00pm',
+            '5:00pm',
+            '6:00pm',
+            '7:00pm',
+            '8:00pm',
+            '9:00pm'
+        ]
+        return (
+            <>
+                <P>{dateClicked}</P>
+                {times.map(time => (
+                    <Wrapper key={time}>
+                        <span>Schedule time for {time}</span>
+                    </Wrapper>
+                ))}
+            </>
+        )
+    }
+
     useEffect(() => {
         axios.get(`/availability/${dateFormat(selectedMonth, 'MMMM%20yyyy')}`).then(newMonth =>
             setAvailability(newMonth.data)
         )
     },[selectedMonth])
-    
+
     return (
-        <Wrapper Width='80%' border='solid 2px #666' Height='60%' display='grid' boxShadow='#ccc 10px 10px 15px'>
-            <Wrapper className='calendar-month' gridColumn='1/8' flexDirection='row' justifyContent='space-around' fontSize='200%'>
-                <span onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}>&lt;</span>
-                <span>{dateFormat(selectedMonth, 'LLLL yyyy')}</span>
-                <span onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}>&gt;</span>
+        <>
+            {dateClicked &&
+                <Button onClick={() => {history.goBack(); setDateClicked()}}>Back to Calendar</Button>
+            }
+            <Wrapper Width='80%' border='solid 2px #666' Height='60%' display='grid' boxShadow='#ccc 10px 10px 15px'>
+                {!dateClicked ?
+                    <>
+                        <Wrapper className='calendar-month' gridColumn='1/8' flexDirection='row' justifyContent='space-around' fontSize='200%'>
+                            <span onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}>&lt;</span>
+                            <span>{dateFormat(selectedMonth, 'LLLL yyyy')}</span>
+                            <span onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}>&gt;</span>
+                        </Wrapper>
+                        {getDays()}
+                        {populateCalendar()}
+                    </>
+                :
+                    <Wrapper>
+                        {getTimes()}
+                    </Wrapper>
+                }
             </Wrapper>
-            {getDays()}
-            {populateCalendar()}
-        </Wrapper>
+        </>
     )
 }
 
