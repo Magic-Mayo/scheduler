@@ -6,9 +6,9 @@ export default styled(Link)`
     text-decoration: none;
     color: #eee;
     font-size: 25px;
-    padding: 10px;
-    margin: ${props => props.margin || '0'};
-    z-index: 1;
+    padding: ${({padding}) => padding || '10px'};
+    margin: ${({margin}) => margin || '0'};
+    width: ${({Width}) => Width || ''};
     
     &:active {
         color: #ddd
