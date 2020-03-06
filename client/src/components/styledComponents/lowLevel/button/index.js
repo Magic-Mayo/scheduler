@@ -15,6 +15,10 @@ export default styled.button`
         border-radius: 7px;
     }
 
+    &:focus {
+        outline: none;
+    }
+
     &:hover {
         cursor: pointer;
     }
