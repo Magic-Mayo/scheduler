@@ -1,5 +1,5 @@
 import React from 'react';
-import {BrowserRouter as Router, Switch, Route, useLocation} from 'react-router-dom';
+import {Switch, Route, useLocation} from 'react-router-dom';
 import Student from './pages/Student';
 import Admin from './pages/Admin';
 import Home from './components/Home';
