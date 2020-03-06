@@ -1,8 +1,11 @@
+require('dotenv').config()
 const Students = require('../models/Students');
 const Schedule = require('../models/Schedule');
+const axios = require('axios');
 
 module.exports = {
-    create: async (req, res) => {
+    addNewStudents: async (req, res) => {
+        console.log('new')
         let login = await axios({
             url: 'https://bootcampspot.com/api/instructor/v1/login',
             method: 'post',
@@ -33,6 +36,8 @@ module.exports = {
             email.push({name: `${student.firstName} ${student.lastName}`, email: student.email});
         })
 
+        console.log(email)
+
         Students.create(email).then(data => {
             return res.json(data)
         }).catch(err => {
@@ -42,7 +47,6 @@ module.exports = {
     },
 
     findOne: (req, res) => {
-        console.log(req.body)
         Students.findOne({email: req.params.email}).then(data => {
             res.json(data);
         }).catch(err => {
@@ -53,5 +57,12 @@ module.exports = {
 
     schedule: (req, res) => {
         
+    },
+
+    getAvailability: (req,res) => {
+        console.log(req.params.date)
+        Schedule.findOne({'date.month': req.params.date}).then(data => {
+            res.json(data)
+        })
     }
 }
