@@ -15,6 +15,10 @@ export default styled.div`
     box-shadow: ${props => props.boxShadow || ''};
     grid-column: ${props => props.gridColumn || ''};
     ${props => props.fontSize ? `font-size: ${props.fontSize};` : '' }
+    border-left: ${props => props.borderLeft || ''};
+    border-right: ${props => props.borderRight || ''};
+    border-bottom: ${props => props.borderBottom || ''};
+
 
     &.calendar-month {
         span:first-of-type:hover, span:last-of-type:hover {
