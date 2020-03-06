@@ -8,7 +8,6 @@ import {Wrapper} from './components/styledComponents';
 
 function App() {
     let location = useLocation();
-    console.log(location)
     return (
         <Wrapper flexDirection='row' Width='100vw' Height='100vh' justifyContent='flex-start'>
             {location.pathname !== '/' &&
