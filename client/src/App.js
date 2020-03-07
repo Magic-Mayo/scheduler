@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import {Switch, Route, useLocation} from 'react-router-dom';
 import Student from './pages/Student';
 import Admin from './pages/Admin';
 import Home from './components/Home';
 import Nav from './components/Nav';
+import Calendar from './components/Calendar';
 import {Wrapper} from './components/styledComponents';
 
 function App() {
@@ -24,6 +25,9 @@ function App() {
                     <Student />
                 </Route>
             </Switch>
+            <Route exact path='/calendar/:date?'>
+                <Calendar />
+            </Route>
         </Wrapper>
     )
 }
