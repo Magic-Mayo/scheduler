@@ -34,14 +34,18 @@ module.exports = {
         students.data.students.map((val,ind)=>{
             const student = val.student;
             email.push({name: `${student.firstName} ${student.lastName}`, email: student.email});
-        })
-
-        Staff.findOneAndUpdate(req.params.id, {$push: {students: email}}, {new: true}).then(data => {
-            return res.json(data)
-        }).catch(err => {
-            console.error(err)
-            return res.json(err);
         });
+
+        Students.create(email, {new: true}).then(data => {
+            
+            Staff.findOneAndUpdate(req.params.id, {$push: {students: email}}, {new: true, upsert: true}).then(data => {
+                return res.json(data);
+            }).catch(err => {
+                console.error(err)
+                return res.json(err);
+            });
+        })
+        
     },
 
     findOne: (req, res) => {
