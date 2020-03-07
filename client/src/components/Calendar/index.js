@@ -61,11 +61,14 @@ const Calendar = () => {
             for(let i = 0; i < 7; i++){
                 numberedDate = dateFormat(currentDay, 'd');
                 days.push(
-                    <Link Width='100%' padding='0' to={`/student/${dateFormat(currentDay, 'MMdd')}`}>
+                    <Link
+                    key={currentDay}
+                    padding='0'
+                    to={`/student/calendar/${dateFormat(currentDay, 'MMdd')}`}
+                    >
                         <Button
                         calendar
                         value={dateFormat(currentDay, 'MMMM d, yyyy')}
-                        key={currentDay}
                         onClick={dateSelect}
                         Color='#000'
                         borderRadius='0'
@@ -142,7 +145,7 @@ const Calendar = () => {
     },[selectedMonth])
 
     return (
-        <>
+        <Wrapper Width='100%' margin='0 0 0 50px'>
             {dateClicked &&
                 <Button onClick={() => {history.goBack(); setDateClicked()}}>Back to Calendar</Button>
             }
@@ -163,7 +166,7 @@ const Calendar = () => {
                     </Wrapper>
                 }
             </Wrapper>
-        </>
+        </Wrapper>
     )
 }
 
