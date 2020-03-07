@@ -2,11 +2,15 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import {Button, Input, Label, Form, Wrapper} from '../components/styledComponents/';
 import Calendar from '../components/Calendar'
+import { Redirect, useLocation, useParams } from 'react-router-dom';
+import SetUser from '../userContext';
 
 const Student = () => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState();
-    const [user, setUser] = useState(true);
+    const [user, setUser] = useState(false);
+    let location = useLocation();
+    let {date} = useParams();
 
     const findStudent = (e) => {
         e.preventDefault();
@@ -22,21 +26,9 @@ const Student = () => {
     return (
         <Wrapper Width='100%' margin='0 0 0 50px'>
             {user ?
-            <Calendar />
+            <Redirect to='/calendar' />
             :
-            <Form onSubmit={findStudent}>
-                <Label>BCS email address: </Label>
-                <Input
-                type='text'
-                name='email'
-                className='input student-input-email'
-                value={email}
-                placeholder='Enter your Bootcamp Spot email'
-                onChange={(e) => setEmail(e.target.value)}
-                onFocus={() => setError()}
-                />
-                <Button>Submit</Button>
-            </Form>
+            <SetUser />
             }
             {error && 
                 <span className='error'>{error}</span>
