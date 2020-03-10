@@ -1,6 +1,5 @@
 require('dotenv').config()
 const Staff = require('../models/Staff');
-const Schedule = require('../models/Schedule');
 const Students = require('../models/Students');
 const axios = require('axios');
 
@@ -50,7 +49,7 @@ module.exports = {
 
     findOne: (req, res) => {
         Students.findOne({email: req.params.email}).then(data => {
-            res.json(data);
+            res.json({name: data.name, email: data.email});
         }).catch(err => {
             console.error(err);
             return res.json(false);
@@ -58,13 +57,13 @@ module.exports = {
     },
 
     getAvailability: (req,res) => {
-        Schedule.findOne({id: req.params.id, 'date.month': req.params.date}).then(data => {
+        Staff.findOne({id: req.params.id, 'schedule.months.month': req.params.date}).then(data => {
             res.json(data);
         })
     },
 
     setAvailability: (req, res) => {
-        Schedule.create(req.body).then(data => {
+        Staff.findOneAndUpdate({id: req.params.id, 'schedule.months.month': req.params.date}, {schedule: req.body}, {new: true, upsert: true}).then(data => {
             res.json(data);
         }).catch(err => {
             res.json(err);
