@@ -11,7 +11,7 @@ import {
 } from 'date-fns';
 import { Wrapper, Button, P } from '../styledComponents';
 import {useHistory, useLocation, useParams, Link} from 'react-router-dom';
-import {InstructorContext, UserContext} from '../../Context';
+import {InstructorContext, UserContext, CurrentInstructorContext} from '../../Context';
 
 const days = [
     'Sun',
@@ -25,12 +25,12 @@ const days = [
 
 
 const Calendar = () => {
-    const {instructor, setInstructor} = useContext(InstructorContext);
+    const {instructor} = useContext(InstructorContext);
+    const {currentInstructor, setCurrentInstructor} = useContext(CurrentInstructorContext);
     const {user} = useContext(UserContext);
     const [selectedMonth, setSelectedMonth] = useState(new Date());
     const [availabilty, setAvailability] = useState();
     const [dateClicked, setDateClicked] = useState();
-    const [currentInstructor, setCurrentInstructor] = useState(instructor);
     const [status, setStatus] = useState();
     const [time, setTime] = useState();
     const history = useHistory();
@@ -181,20 +181,13 @@ const Calendar = () => {
     // }, [currentInstructor, selectedMonth]);
 
     useEffect(() => {
-        setCurrentInstructor(() => {
-            instructor.map(ins => {
-                return ins.id === instructorId;
-            })
-        })
-    }, [instructorId])
-
-    useEffect(() => {
-        fetch(`/availability/${dateFormat(selectedMonth, 'MMMM%20yyyy')}`).then(newMonth => {
+        fetch(`/availability/${dateFormat(selectedMonth, 'MMyyyy')}/${currentInstructor.id}`).then(newMonth => {
+            console.log(newMonth)
             const times = []
             times.push(newMonth.data);
             setAvailability(newMonth.data);
         })
-    },[instructor, selectedMonth])
+    },[currentInstructor])
 
     useEffect(() => {
         fetch({
@@ -221,6 +214,7 @@ const Calendar = () => {
                         <Link
                         key={ins.id}
                         to={`/student/calendar/${ins.id}`}
+                        onClick={() => setCurrentInstructor(ins.id)}
                         >
                             <Button
                             margin='10px 0'
