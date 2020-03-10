@@ -8,6 +8,19 @@ const StaffSchema = new Schema({
     students: [{
         name: {type: String, require: true},
         email: {type: String, require: true}
+    }],
+    schedule: [{
+        months: [{
+            month: {type: String, require: true},
+            days: [{
+                date: {type: Date, require: true},
+                times: [{
+                    time: {type: String, require: true},
+                    studentName: {type: String, require: true},
+                    studentEmail: {type: String, require: true}
+                }]
+            }]
+        }],    
     }]
 })
 
