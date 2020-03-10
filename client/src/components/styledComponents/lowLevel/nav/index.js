@@ -6,21 +6,18 @@ export default styled.nav`
     position:fixed;
     flex-direction: column;
     background-color: #ba0c2f;
-    width: ${props => props.Width};
+    width: ${({w}) => w};
     height: 100vh;
-    ${props => props.boxShadow}
+    ${({boxShadow}) => boxShadow}
     transition: width .9s, box-shadow .9s;
     overflow: hidden;
-
-    &:hover {
-        cursor: pointer;
-    }
     
     span:first-of-type {
         text-align: right;
         font-size: 35px;
         font-weight: bolder;
-        margin-right: 10px;
+        padding: ${({expanded}) => expanded ? '0 10px 0 0' : '0 5px 0 0'};
+        transition: padding .9s;
 
         &:hover {
             cursor: pointer;
