@@ -1,16 +1,13 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import {Button, Input, Label, Form, Wrapper} from '../components/styledComponents/';
-import Calendar from '../components/Calendar'
-import { Redirect, useLocation, useParams } from 'react-router-dom';
-import {UserContext} from '../UserContext';
+import { Redirect } from 'react-router-dom';
+import {UserContext} from '../Context';
 
 const Student = () => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState();
     const {user, setUser} = useContext(UserContext);
-    let location = useLocation();
-    let {date} = useParams();
 
     const findStudent = (e) => {
         e.preventDefault();
@@ -24,7 +21,7 @@ const Student = () => {
     }
 
     return (
-        <Wrapper Width='100%' margin='0 0 0 50px'>
+        <Wrapper w='100%' margin='0 0 0 50px'>
             {!user ?
                 <Form onSubmit={findStudent}>
                     <Label>BCS email address: </Label>
