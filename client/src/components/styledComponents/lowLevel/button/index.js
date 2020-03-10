@@ -1,20 +1,23 @@
 import styled from 'styled-components';
 
 export default styled.button`
-    background-color: ${props => props.bgColor || '#172a55'};
-    width: ${props => props.Width || '125px'};
-    height: ${props => props.Height || '50px'};
-    color: ${props => props.Color || '#fff'};
-    border-radius: ${props => props.borderRadius || '7px'};
-    border: ${props => props.border || 'none'};
+    background-color: ${({bgColor}) => bgColor || '#172a55'};
+    width: ${({w}) => w || '125px'};
+    height: ${({h}) => h || '50px'};
+    color: ${({fontColor}) => fontColor || '#fff'};
+    border-radius: ${({borderRadius}) => borderRadius || '7px'};
+    border: ${({border}) => border || 'none'};
     box-shadow: ${props => props.boxShadow ? '#444 7px 5px 15px' : ''};
-    font-size: 18px;
+    font-size: ${({fontS}) => fontS || '18px'};
     justify-content: ${props => props.justifyContent || ''};
-    display: ${props => props.display || ''};
-    padding: 8px;
-    vertical-align: text-top;
-
-    ${props => !props.calendar ?
+    display: ${({disp}) => disp || ''};
+    padding: ${({padding}) => padding || '8px'};
+    margin: ${({margin}) => margin || ''};
+    text-align: ${({textAlign}) => textAlign || 'center'};
+    border-bottom: ${({borderBottom}) => borderBottom || ''};
+    border-top: ${({borderTop}) => borderTop || ''};
+    
+    ${({calendar}) => !calendar ?
         `&:active {
             box-shadow: none;
             border-radius: 7px;
