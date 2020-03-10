@@ -5,25 +5,25 @@ const StaffSchema = new Schema({
     id: {type: String, require: true},
     name: {type: String, require: true},
     email: {type: String, require: true},
+    pass: {type: String, required: true},
     students: [{
         name: {type: String, require: true},
-        email: {type: String, require: true}
+        email: {type: String, require: true},
+        id: {type: String, require: true}
     }],
     schedule: [{
-        months: [{
-            month: {type: String, require: true},
-            days: [{
-                date: {type: Date, require: true},
-                times: [{
-                    time: {type: String, require: true},
-                    studentName: {type: String, require: true},
-                    studentEmail: {type: String, require: true}
-                }]
+        month: {type: String, require: true},
+        days: [{
+            date: {type: Date, require: true},
+            times: [{
+                time: {type: String, require: true},
+                studentName: String,
+                studentEmail: String
             }]
-        }],    
+        }]
     }]
 })
 
-const Staff = mongoose.model('Students', StaffSchema);
+const Staff = mongoose.model('Staff', StaffSchema);
 
 module.exports = Staff;
