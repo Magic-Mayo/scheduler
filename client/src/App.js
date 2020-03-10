@@ -6,11 +6,12 @@ import Home from './components/Home';
 import Nav from './components/Nav';
 import Calendar from './components/Calendar';
 import {Wrapper} from './components/styledComponents';
-import {UserContext, InstructorContext} from './Context';
+import {UserContext, InstructorContext, CurrentInstructorContext} from './Context';
 
 function App() {
     const [user, setUser] = useState();
-    const [instructor, setInstructor] = useState([{name: 'me', id: 1}, {name: 'you', id: 2}]);
+    const [instructor, setInstructor] = useState([{id: 13786, name: 'Mike Mayo'}, {name: 'you', id: 2}]);
+    const [currentInstructor, setCurrentInstructor] = useState();
     let location = useLocation();
 
     useEffect(() => {
@@ -24,29 +25,31 @@ function App() {
     return (
         <Wrapper flexDirection='row' w='100vw' h='100vh' justifyContent='flex-start'>
             <InstructorContext.Provider value={{instructor, setInstructor}}>
-                <UserContext.Provider value={{user, setUser}}>
-                {location.pathname !== '/' &&
-                    <Nav />
-                }
-                    <Route exact path='/'>
-                        <Home />
-                    </Route>
-                    <Switch>
-                        <Route path='/admin'>
-                            <Admin />
+                <CurrentInstructorContext.Provider value={{currentInstructor, setCurrentInstructor}}>
+                    <UserContext.Provider value={{user, setUser}}>
+                    {location.pathname !== '/' &&
+                        <Nav />
+                    }
+                        <Route exact path='/'>
+                            <Home />
                         </Route>
-                        <Route exact path='/student'>
-                            <Student />
-                        </Route>
-                    </Switch>
-                        <Route path='/student/calendar/:instructorId?/:date?'>
-                            {user ?
-                                <Calendar />
-                                :
-                                <Redirect to='/student' />
-                            }
-                        </Route>
-                </UserContext.Provider>
+                        <Switch>
+                            <Route path='/admin'>
+                                <Admin />
+                            </Route>
+                            <Route exact path='/student'>
+                                <Student />
+                            </Route>
+                        </Switch>
+                            <Route path='/student/calendar/:instructorId?/:date?'>
+                                {user ?
+                                    <Calendar />
+                                    :
+                                    <Redirect to='/student' />
+                                }
+                            </Route>
+                    </UserContext.Provider>
+                </CurrentInstructorContext.Provider>
             </InstructorContext.Provider>
         </Wrapper>
     )
