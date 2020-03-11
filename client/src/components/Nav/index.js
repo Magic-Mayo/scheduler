@@ -74,6 +74,14 @@ const NavBar = () => {
                     </Link>
                 ))
             }
+            {user &&
+                    <Button
+                    onClick={() => setUser(null)}
+                    margin='0 0 0 25px'
+                    >
+                        Logout
+                    </Button>
+            }
         </Nav>
     )
 }
