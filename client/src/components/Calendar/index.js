@@ -29,13 +29,10 @@ const Calendar = () => {
     const {currentInstructor, setCurrentInstructor} = useContext(CurrentInstructorContext);
     const {user} = useContext(UserContext);
     const [selectedMonth, setSelectedMonth] = useState(new Date());
-    const [availabilty, setAvailability] = useState();
     const [dateClicked, setDateClicked] = useState();
-    const [status, setStatus] = useState();
-    const [time, setTime] = useState();
     const history = useHistory();
     let location = useLocation();
-    let {date, instructorId} = useParams();
+    let {instructorId} = useParams();
 
     const getDays = () => {
         return (
@@ -170,9 +167,9 @@ const Calendar = () => {
         )
     }
 
-    useEffect(() => {
-        setDateClicked(date);
-    }, [date]);
+    // useEffect(() => {
+    //     setDateClicked(date);
+    // }, [date]);
 
     // useEffect(() => {
     //     fetch(`/availability/${dateFormat(selectedMonth, 'MMddyyyy')}/${instructorId}/`).then(dates => {
@@ -180,24 +177,24 @@ const Calendar = () => {
     //     })
     // }, [currentInstructor, selectedMonth]);
 
-    useEffect(() => {
-        fetch(`/availability/${dateFormat(selectedMonth, 'MMyyyy')}/${currentInstructor.id}`).then(newMonth => {
-            console.log(newMonth)
-            const times = []
-            times.push(newMonth.data);
-            setAvailability(newMonth.data);
-        })
-    },[currentInstructor])
+    // useEffect(() => {
+    //     fetch(`/availability/${dateFormat(selectedMonth, 'MMyyyy')}/${currentInstructor.id}`).then(newMonth => {
+    //         console.log(newMonth)
+    //         const times = []
+    //         times.push(newMonth.data);
+    //         setAvailability(newMonth.data);
+    //     })
+    // },[currentInstructor])
 
-    useEffect(() => {
-        fetch({
-            url: `/schedule/${user.id}/${currentInstructor.id}`,
-            method: 'POST'
-        }).then(res => {
-            if(res.data) return setStatus('Your time has been reserved!');
-            setStatus('There was an error in reserving this time.  Try again and if the error persists please contact your Instructor/TA directly')
-        })
-    }, [time])
+    // useEffect(() => {
+    //     fetch({
+    //         url: `/schedule/${user.id}/${currentInstructor.id}`,
+    //         method: 'POST'
+    //     }).then(res => {
+    //         if(res.data) return setStatus('Your time has been reserved!');
+    //         setStatus('There was an error in reserving this time.  Try again and if the error persists please contact your Instructor/TA directly')
+    //     })
+    // }, [time])
 
     return (
         <Wrapper w='100%' margin='0 0 0 35px'>
@@ -205,53 +202,29 @@ const Calendar = () => {
             {dateClicked &&
                 <Button onClick={() => {history.goBack(); setDateClicked()}}>Back to Calendar</Button>
             }
-            {location.pathname === `/student/calendar` ?
-                <Wrapper>
-                    <P>
-                        Please choose an instructor to view their calendar:
-                    </P>
-                    {instructor.map(ins => (
-                        <Link
-                        key={ins.id}
-                        to={`/student/calendar/${ins.id}`}
-                        onClick={() => setCurrentInstructor(ins.id)}
-                        >
-                            <Button
-                            margin='10px 0'
-                            bgColor='#172a55'
-                            borderRadius='7px'
-                            textAlign='center'
-                            >
-                                {ins.name}
-                            </Button>
-                        </Link>
-                    ))}
-                </Wrapper>
+            <Wrapper
+            grid={location.pathname === `/student/calendar/${instructorId}` ? 'grid' : 'grid1'}
+            w='80%'
+            border='solid 2px #666'
+            h='60%' display='grid'
+            boxShadow='#ccc 10px 10px 15px'
+            >
+            {location.pathname === `/student/calendar/${instructorId}` ?
+                <>
+                    <Wrapper className='calendar-month' gridColumn='1/8' flexDirection='row' justifyContent='space-around' fontS='200%'>
+                        <span onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}>&lt;</span>
+                        <span>{dateFormat(selectedMonth, 'LLLL yyyy')}</span>
+                        <span onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}>&gt;</span>
+                    </Wrapper>
+                    {getDays()}
+                    {populateCalendar()}
+                </>
             :
-                <Wrapper
-                grid={location.pathname === `/student/calendar/${instructorId}` ? 'grid' : 'grid1'}
-                w='80%'
-                border='solid 2px #666'
-                h='60%' display='grid'
-                boxShadow='#ccc 10px 10px 15px'
-                >
-                    {location.pathname === `/student/calendar/${instructorId}` ?
-                        <>
-                            <Wrapper className='calendar-month' gridColumn='1/8' flexDirection='row' justifyContent='space-around' fontS='200%'>
-                                <span onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}>&lt;</span>
-                                <span>{dateFormat(selectedMonth, 'LLLL yyyy')}</span>
-                                <span onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}>&gt;</span>
-                            </Wrapper>
-                            {getDays()}
-                            {populateCalendar()}
-                        </>
-                    : location.pathname === `/student/calendar/${instructorId}/${dateClicked}` &&
-                        <>
-                            {getTimes()}
-                        </>
-                    }
-                </Wrapper>
+                <>
+                    {getTimes()}
+                </>
             }
+            </Wrapper>
         </Wrapper>
     )
 }
