@@ -9,9 +9,11 @@ import {
     addMonths,
     subMonths,
 } from 'date-fns';
-import { Wrapper, Button, P } from '../styledComponents';
+import { Wrapper, Button, P, Input } from '../styledComponents';
+import Modal from '../Modal';
 import {useHistory, useLocation, useParams, Link} from 'react-router-dom';
 import {InstructorContext, UserContext, CurrentInstructorContext} from '../../Context';
+import axios from 'axios';
 
 const days = [
     'Sun',
@@ -30,6 +32,9 @@ const Calendar = () => {
     const {user} = useContext(UserContext);
     const [selectedMonth, setSelectedMonth] = useState(new Date());
     const [dateClicked, setDateClicked] = useState();
+    const [availableDays, setAvailableDays] = useState([]);
+    const [selectedTime, setSelectedTime] = useState();
+    const [topic, setTopic] = useState();
     const history = useHistory();
     let location = useLocation();
     let {instructorId} = useParams();
@@ -58,111 +63,149 @@ const Calendar = () => {
 
         while(currentDay <= endofWeek){
             for(let i = 0; i < 7; i++){
+                const today = currentDay;
+                const availableDate = availableDays?.days?.filter(date =>
+                    dateFormat(new Date(date.date), 'MMddyyyy') === dateFormat(currentDay, 'MMddyyyy')).length;
                 numberedDate = dateFormat(currentDay, 'd');
+                console.log(availableDate)
                 days.push(
-                    <Link
-                    className='link'
-                    key={currentDay}
-                    to={`/student/calendar/${instructorId}/${dateFormat(currentDay, 'MMddyyyy')}`}
-                    >
-                        <Button
-                        onClick={(e) => setDateClicked(dateFormat(currentDay, 'MMddyyyy'))}
-                        value={dateFormat(currentDay, 'MMMM d, yyyy')}
-                        calendar
-                        w='100%'
-                        fontColor={dateFormat(currentDay, 'MM') === dateFormat(startOfMonth, 'MM') ? '#000' : 'rgba(0,0,0,.2)'}
-                        borderRadius='0'
-                        border={i === 0 || i === 6 ?  '' : '.5px solid #ccc'}
-                        borderTop={i === 0 || i === 6 ? '.5px solid #ccc' : ''}
-                        borderBottom={i === 0 || i === 6 ? '.5px solid #ccc' : ''}
-                        h='100%'
-                        w='100%'
-                        bgColor='#fff'
-                        disp='flex'
-                        justifyContent='flex-end'
+                    availableDate ?
+                        <Link
+                        className='link'
+                        key={currentDay}
+                        to={`/student/calendar/${instructorId}/${dateFormat(currentDay, 'MMddyyyy')}`}
                         >
-                            {numberedDate}
-                        </Button>
-                    </Link>
+                            <Button
+                            className={dateFormat(selectedMonth, 'MMddyyyy') === dateFormat(currentDay, 'MMddyyyy') ? 'today' : ''}
+                            onClick={availableDate ? () => setDateClicked(today) : null}
+                            bgColor={availableDate || dateFormat(currentDay, 'MM') !== dateFormat(startOfMonth, 'MM') ?
+                                '#fff' : '#ba0c2f'}
+                            calendar
+                            w='100%'
+                            fontColor={dateFormat(currentDay, 'MM') === dateFormat(startOfMonth, 'MM') ? '#000' : 'rgba(0,0,0,.2)'}
+                            borderRadius='0'
+                            borderLeft={i !== 0 ? '.25px solid #ccc' : ''}
+                            borderRight={i !== 6 ? '.25px solid #ccc' : ''}
+                            h='100%'
+                            w='100%'
+                            disp='flex'
+                            justifyContent='flex-end'
+                            noCursor={!availableDate}
+                            >
+                                {numberedDate}
+                            </Button>
+                        </Link>
+                    :
+                        <Wrapper w='100%'>
+                            <Button
+                            className={dateFormat(selectedMonth, 'MMddyyyy') === dateFormat(currentDay, 'MMddyyyy') ? 'today' : ''}
+                            onClick={availableDate ? () => setDateClicked(today) : null}
+                            bgColor={availableDate || dateFormat(currentDay, 'MM') !== dateFormat(startOfMonth, 'MM') ?
+                                '#fff' : '#ba0c2f'}
+                            calendar
+                            w='100%'
+                            fontColor={dateFormat(currentDay, 'MM') === dateFormat(startOfMonth, 'MM') ? '#000' : 'rgba(0,0,0,.2)'}
+                            borderRadius='0'
+                            borderLeft={i !== 0 ? '.25px solid #ccc' : ''}
+                            borderRight={i !== 6 ? '.25px solid #ccc' : ''}
+                            h='100%'
+                            w='100%'
+                            disp='flex'
+                            justifyContent='flex-end'
+                            noCursor={!availableDate}
+                            >
+                                {numberedDate}
+                            </Button>
+                        </Wrapper>
                 )
 
                 currentDay = addDays(currentDay, 1);
             }
 
             weeks.push(
-                <Wrapper
-                key={dateFormat(currentDay, 'w')}
-                flexDirection='row'
-                h='100%'
-                gridColumn='1/8'
-                justifyContent='space-between'
-                // borderLeft='#666 solid 1px'
-                // borderRight='#666 solid 1px'
-                >
-                    {days.map(day => (
-                        day
-                    ))}
-                </Wrapper>
-                );
+                days.map(day => (day))
+            );
 
             days.length = 0;
         }
 
-        return weeks.map(week => (
-            week
+        return weeks.map((week, ind, arr) => (
+            <Wrapper
+            key={ind}
+            flexDirection='row'
+            h='100%'
+            gridColumn='1/8'
+            justifyContent='space-between'
+            borderBottom={ind !== arr.length - 1 ? '1px solid #ccc' : ''}
+            borderTop={ind !== 0 ? '1px solid #ccc' : ''}
+            >
+                {week}
+            </Wrapper>
+
         ))
         
     }
 
-    const getTimes = () => {
-        let month;
-        let day;
-        let year;
+    const submitSchedule = id => {
+        axios.post(`/schedule/${id}/:date/:time`)
+    }
 
-        const times = [
-            '09:00am',
-            '10:00am',
-            '11:00am',
-            '12:00pm',
-            '1:00pm',
-            '2:00pm',
-            '3:00pm',
-            '4:00pm',
-            '5:00pm',
-            '6:00pm',
-            '7:00pm',
-            '8:00pm',
-            '9:00pm'
-        ];
+    const scheduleTime = (time, date) => {
+        setSelectedTime(
+            <Modal 
+            submitTime={() => {
+                axios.post(`/schedule/`)
+            }}
+            >
+                <P>What would you like to cover on {date} at {time.time}?</P>
+                <Input
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder='Topic to cover'></Input>
+                <Wrapper flexDirection='row'>
+                    <Button onClick={() => submitSchedule(time._id)} bgColor='#172a55'>Schedule Time!</Button>
+                    <Button onClick={() => setSelectedTime()} bgColor='#ba0c2f'>Cancel</Button>
+                </Wrapper>
+            </Modal>
+        )
+    }
 
-        if(dateClicked){
-            const path = location.pathname.split(`calendar/${instructorId}/`)[1].split('');
-            month = path.slice(0,2).join('');
-            day = path.slice(2,4).join('');
-            year = path.slice(4).join('');
-        }
+    const getTimes = () => {        
+        const [today] = availableDays.days.filter(days =>
+            dateFormat(new Date(days.date), 'dd') === dateFormat(dateClicked, 'dd')
+        );
 
         return (
             <>
-                {dateClicked &&
-                    <P
-                    textAlign='center'
-                    gridColumn='1/6'
-                    fontS='25px'
-                    fontW='bolder'
-                    >{dateFormat(new Date(year, month, day), 'MMMM dd, yyyy')}</P>
-                }
-                {times.map(time => (
-                    <Wrapper key={time}>
-                        <Button
-                        h='75px'
-                        fontS='14px'
-                        // onClick={setStatus}
+                {/* {dateClicked && */}
+                    {/* <> */}
+                        <P
+                        textAlign='center'
+                        w='100%'
+                        fontS='25px'
+                        fontW='bolder'
                         >
-                            Schedule time for {time}
-                        </Button>
-                    </Wrapper>
-                ))}
+                            {currentInstructor.name}'s available times for {dateFormat(new Date(dateClicked), 'MMMM dd, yyyy')}
+                        </P>
+                    
+                        <Wrapper w='100%'>
+                            {today.times.map(time => (
+                                <Button
+                                key={time._id}
+                                h='75px'
+                                fontS='14px'
+                                onClick={selectedTime ? null :
+                                    () => scheduleTime(time, dateFormat(new Date(dateClicked), 'MMMM d'))
+                                }
+                                noCursor={selectedTime}
+                                >
+                                    Schedule time for {dateFormat(new Date(time.time), 'hh:mm a')}
+                                </Button>
+                            ))}
+                        </Wrapper>
+                    {/* </> */}
+                {/* // } */}
+                
             </>
         )
     }
@@ -178,14 +221,18 @@ const Calendar = () => {
     // }, [currentInstructor, selectedMonth]);
 
     // useEffect(() => {
+    //     setSelectedMonth(new Date());
     //     fetch(`/availability/${dateFormat(selectedMonth, 'MMyyyy')}/${currentInstructor.id}`).then(newMonth => {
-    //         console.log(newMonth)
-    //         const times = []
-    //         times.push(newMonth.data);
-    //         setAvailability(newMonth.data);
-    //     })
+    //         setAvailableDays(newMonth.data.days);
+    //     });
     // },[currentInstructor])
-
+    
+    useEffect(() => {
+        axios.get(`/availability/${selectedMonth}/${currentInstructor.id}`).then(newMonth => {
+            setAvailableDays(newMonth.data);
+        });
+    }, [selectedMonth])
+    
     // useEffect(() => {
     //     fetch({
     //         url: `/schedule/${user.id}/${currentInstructor.id}`,
@@ -194,38 +241,70 @@ const Calendar = () => {
     //         if(res.data) return setStatus('Your time has been reserved!');
     //         setStatus('There was an error in reserving this time.  Try again and if the error persists please contact your Instructor/TA directly')
     //     })
-    // }, [time])
+    // }, [time]);
+
+    useEffect(() => {
+        if(location.pathname === `/student/calendar/${instructorId}`){
+            setDateClicked();
+            setSelectedTime();
+        }
+    },[location.pathname]);
 
     return (
-        <Wrapper w='100%' margin='0 0 0 35px'>
-            <Wrapper top='5%' position='absolute' fontS='32px'>Welcome back, {user.name}!</Wrapper>
-            {dateClicked &&
-                <Button onClick={() => {history.goBack(); setDateClicked()}}>Back to Calendar</Button>
-            }
+        <>
+            {selectedTime && selectedTime}
             <Wrapper
-            grid={location.pathname === `/student/calendar/${instructorId}` ? 'grid' : 'grid1'}
-            w='80%'
-            border='solid 2px #666'
-            h='60%' display='grid'
-            boxShadow='#ccc 10px 10px 15px'
+            w='100%'
+            h='100%'
+            margin='0 0 0 35px'
+            bgColor={selectedTime ? '#ccc' : ''}
+            onClick={selectedTime ? () => setSelectedTime() : null}
             >
-            {location.pathname === `/student/calendar/${instructorId}` ?
-                <>
-                    <Wrapper className='calendar-month' gridColumn='1/8' flexDirection='row' justifyContent='space-around' fontS='200%'>
-                        <span onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}>&lt;</span>
-                        <span>{dateFormat(selectedMonth, 'LLLL yyyy')}</span>
-                        <span onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}>&gt;</span>
-                    </Wrapper>
-                    {getDays()}
-                    {populateCalendar()}
-                </>
-            :
-                <>
-                    {getTimes()}
-                </>
-            }
+                <Wrapper top='5%' position='absolute' fontS='32px'>Welcome back, {user.name}!</Wrapper>
+                {dateClicked &&
+                    <Button
+                    onClick={selectedTime ? null : () => {history.goBack(); setDateClicked()}}
+                    noCursor={selectedTime}
+                    >Back to Calendar</Button>
+                }
+                {!dateClicked &&
+                    <P>
+                        {`${currentInstructor.name}'s calendar`}
+                    </P>
+                }
+                <Wrapper
+                grid={location.pathname === `/student/calendar/${instructorId}` ? 'grid' : ''}
+                w='80%'
+                border='solid 2px #666'
+                h='60%'
+                display={location.pathname === `/student/calendar/${instructorId}` ? 'grid' : ''}
+                flexDirection={dateClicked ? 'row' : ''}
+                boxShadow='#ccc 10px 10px 15px'
+                flexWrap={dateClicked ? 'wrap' : ''}
+                >
+                {location.pathname === `/student/calendar/${instructorId}` ?
+                    <>
+                        <Wrapper
+                        className='calendar-month'
+                        gridColumn='1/8'
+                        flexDirection='row'
+                        justifyContent='space-around'
+                        fontS='200%'>
+                            <span onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}>&lt;</span>
+                            <span>{dateFormat(selectedMonth, 'LLLL yyyy')}</span>
+                            <span onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}>&gt;</span>
+                        </Wrapper>
+                        {getDays()}
+                        {populateCalendar()}
+                    </>
+                :
+                    <>
+                        {getTimes()}
+                    </>
+                }
+                </Wrapper>
             </Wrapper>
-        </Wrapper>
+        </>
     )
 }
 
