@@ -177,35 +177,30 @@ const Calendar = () => {
 
         return (
             <>
-                {/* {dateClicked && */}
-                    {/* <> */}
-                        <P
-                        textAlign='center'
-                        w='100%'
-                        fontS='25px'
-                        fontW='bolder'
+                <P
+                textAlign='center'
+                w='100%'
+                fontS='25px'
+                fontW='bolder'
+                >
+                    {currentInstructor.name}'s available times for {dateFormat(new Date(dateClicked), 'MMMM dd, yyyy')}
+                </P>
+            
+                <Wrapper w='100%'>
+                    {today.times.map(time => (
+                        <Button
+                        key={time._id}
+                        h='75px'
+                        fontS='14px'
+                        onClick={selectedTime ? null :
+                            () => scheduleTime(time, dateFormat(new Date(dateClicked), 'MMMM d'))
+                        }
+                        noCursor={selectedTime}
                         >
-                            {currentInstructor.name}'s available times for {dateFormat(new Date(dateClicked), 'MMMM dd, yyyy')}
-                        </P>
-                    
-                        <Wrapper w='100%'>
-                            {today.times.map(time => (
-                                <Button
-                                key={time._id}
-                                h='75px'
-                                fontS='14px'
-                                onClick={selectedTime ? null :
-                                    () => scheduleTime(time, dateFormat(new Date(dateClicked), 'MMMM d'))
-                                }
-                                noCursor={selectedTime}
-                                >
-                                    Schedule time for {dateFormat(new Date(time.time), 'hh:mm a')}
-                                </Button>
-                            ))}
-                        </Wrapper>
-                    {/* </> */}
-                {/* // } */}
-                
+                            Schedule time for {dateFormat(new Date(time.time), 'hh:mm a')}
+                        </Button>
+                    ))}
+                </Wrapper>                
             </>
         )
     }
