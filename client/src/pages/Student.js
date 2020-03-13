@@ -46,7 +46,7 @@ const Student = () => {
                         <Link
                         key={ins.id}
                         to={`/student/calendar/${ins.id}`}
-                        onClick={() => setCurrentInstructor(ins.id)}
+                        onClick={() => setCurrentInstructor(ins)}
                         >
                             <Button
                             margin='10px 0'
