@@ -6,8 +6,8 @@ export default styled.button`
     height: ${({h}) => h || '50px'};
     color: ${({fontColor}) => fontColor || '#fff'};
     border-radius: ${({borderRadius}) => borderRadius || '7px'};
-    border: ${({border}) => border || 'none'};
     box-shadow: ${props => props.boxShadow ? '#444 7px 5px 15px' : ''};
+    border: ${({border}) => border || 'none'};
     font-size: ${({fontS}) => fontS || '18px'};
     justify-content: ${props => props.justifyContent || ''};
     display: ${({disp}) => disp || ''};
@@ -16,6 +16,17 @@ export default styled.button`
     text-align: ${({textAlign}) => textAlign || 'center'};
     border-bottom: ${({borderBottom}) => borderBottom || ''};
     border-top: ${({borderTop}) => borderTop || ''};
+    border-left: ${({borderLeft}) => borderLeft || ''};
+    border-right: ${({borderRight}) => borderRight || ''};
+    position: ${({position}) => position || ''};
+    bottom: ${({bottom}) => bottom || ''};
+    border-color: ${({borderColor}) => borderColor || ''};
+    
+    &.today {
+        border-color: #000;
+        border-style: dashed;
+        border-width: 2px;
+    }
     
     ${({calendar}) => !calendar ?
         `&:active {
@@ -27,8 +38,9 @@ export default styled.button`
     &:focus {
         outline: none;
     }
-
-    &:hover {
-        cursor: pointer;
+    ${({noCursor}) => noCursor ? '' :
+        `&:hover {
+            cursor: pointer;
+        }`
     }
 `;
