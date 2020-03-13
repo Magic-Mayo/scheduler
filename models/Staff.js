@@ -12,13 +12,14 @@ const StaffSchema = new Schema({
         id: {type: String, require: true}
     }],
     schedule: [{
-        month: {type: String, require: true},
+        month: {type: Date, require: true},
         days: [{
             date: {type: Date, require: true},
             times: [{
-                time: {type: String, require: true},
+                time: {type: Date, require: true},
                 studentName: String,
-                studentEmail: String
+                studentEmail: String,
+                topic: String
             }]
         }]
     }]
