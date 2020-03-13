@@ -3,6 +3,7 @@ const Staff = require('../models/Staff');
 const Students = require('../models/Students');
 const axios = require('axios');
 const bcrypt = require('bcrypt');
+const {format} = require('date-fns');
 
 module.exports = {
     addNewStudents: async (req, res) => {
@@ -106,18 +107,36 @@ module.exports = {
     },
 
     getAvailability: (req,res) => {
-        console.log(req.originalUrl)
         Staff.findOne({id: req.params.id}).then(data => {
-            const schedule = data.schedule.filter(val => val.month === req.params.date);
-            return res.json(schedule);
+            if(data){
+                const openDays = {};
+                const [schedule] = data.schedule.filter(val => 
+                    format(new Date(val.month), 'MMyyy') === format(new Date(req.params.date), 'MMyyyy'));
+
+                return res.json(schedule);
+            }
+
+            res.json(null);
         })
     },
 
     setAvailability: (req, res) => {
-        Staff.findOneAndUpdate({id: req.params.id, 'schedule.month': req.params.date}, {schedule: req.body}, {new: true, upsert: true}).then(data => {
+        Staff.findOneAndUpdate({id: req.params.id, 'schedule.month': req.params.date}, {'schedule': req.body}, {new: true, upsert: true}).then(data => {
             res.json(data);
         }).catch(err => {
             res.json(err);
+        })
+    },
+
+    scheduleTime: (req, res) => {
+        const id = req.params.id;
+        const date = req.params.date;
+        const time = req.params.time;
+        const formattedDate = date.split('').slice(-6).join('');
+
+        Staff.findOne({id: id}).then(data => {
+            const [schedule] = data.schedule.filter(val => val.month === formattedDate)
+            schedule.days.filter(val => console.log(val));
         })
     },
 
