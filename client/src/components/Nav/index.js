@@ -4,7 +4,7 @@ import {InstructorContext, UserContext} from '../../Context';
 import {Link} from 'react-router-dom';
 
 const NavBar = () => {
-    const [expanded, setExpanded] = useState(true);
+    const [expanded, setExpanded] = useState(false);
     const [instructorExpand, setInstructorExpand] = useState(false);
     const {instructor} = useContext(InstructorContext);
     const {user, setUser} = useContext(UserContext);
@@ -75,12 +75,14 @@ const NavBar = () => {
                 ))
             }
             {user &&
-                    <Button
-                    onClick={() => setUser(null)}
-                    margin='0 0 0 25px'
-                    >
-                        Logout
-                    </Button>
+                <Button
+                onClick={() => setUser(null)}
+                margin='0 37px'
+                position='absolute'
+                bottom='50px'
+                >
+                    Logout
+                </Button>
             }
         </Nav>
     )
