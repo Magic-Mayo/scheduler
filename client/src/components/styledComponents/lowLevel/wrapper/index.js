@@ -15,13 +15,17 @@ export default styled.div`
     box-shadow: ${props => props.boxShadow || ''};
     grid-column: ${props => props.gridColumn || ''};
     ${({fontS}) => fontS ? `font-size: ${fontS}` : '' };
-    border-left: ${props => props.borderLeft || ''};
-    border-right: ${props => props.borderRight || ''};
-    border-bottom: ${props => props.borderBottom || ''};
-    margin: ${props => props.margin || ''};
+    border-left: ${({borderLeft}) => borderLeft || ''};
+    border-right: ${({borderRight}) => borderRight || ''};
+    border-bottom: ${({borderBottom}) => borderBottom || ''};
+    border-top: ${({borderTop}) => borderTop || ''};
+    margin: ${({margin}) => margin || ''};
     position: ${({position}) => position || ''};
     top: ${({top}) => top || ''};
-
+    padding: ${({padding}) => padding || ''};
+    transform: ${({transform}) => transform || ''};
+    left: ${({left}) => left || ''};
+    flex-wrap: ${({flexWrap}) => flexWrap || ''};
 
     &.calendar-month {
         span:first-of-type:hover, span:last-of-type:hover {
