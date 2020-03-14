@@ -26,10 +26,21 @@ export default styled.div`
     transform: ${({transform}) => transform || ''};
     left: ${({left}) => left || ''};
     flex-wrap: ${({flexWrap}) => flexWrap || ''};
+    max-width: ${({maxWidth}) => maxWidth || ''};
+    bottom: ${({bottom}) => bottom || ''};
 
     &.calendar-month {
         span:first-of-type:hover, span:last-of-type:hover {
             cursor: pointer
+        }
+    }
+
+    .refresh {
+        position: absolute;
+        left: 25px;
+
+        &:hover {
+            cursor: pointer;
         }
     }
 `
