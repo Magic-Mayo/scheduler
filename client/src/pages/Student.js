@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import {Button, Input, Label, Form, Wrapper, P} from '../components/styledComponents/';
 import { Link } from 'react-router-dom';
@@ -8,7 +8,7 @@ const Student = () => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState();
     const {user, setUser} = useContext(UserContext);
-    const {instructor} = useContext(InstructorContext);
+    const {instructor, setInstructor} = useContext(InstructorContext);
     const {setCurrentInstructor} = useContext(CurrentInstructorContext);
 
     const findStudent = (e) => {
@@ -17,10 +17,11 @@ const Student = () => {
 
         axios.get(`/student/${email}`).then(res => {
             if(!res.data) return setError('This email does not exist in Bootcamp Spot!  Please check the email address and try again.  If this error persists please contact your instructor or TA for further assistance.');
+            setInstructor(res.data.staff);
             setUser({name: res.data.name, email: res.data.email});
         })
     }
-
+    
     return (
         <Wrapper w='100%' margin='0 0 0 50px'>
             {!user ?
