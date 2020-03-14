@@ -11,13 +11,13 @@ export default styled.nav`
     ${({boxShadow}) => boxShadow}
     transition: width .9s, box-shadow .9s;
     overflow: hidden;
+    z-index: 1000;
     
-    span:first-of-type {
+    .icon {
         text-align: right;
-        font-size: 35px;
-        font-weight: bolder;
-        padding: ${({expanded}) => expanded ? '0 10px 0 0' : '0 5px 0 0'};
-        transition: padding .9s;
+        padding-right: 9px;
+        margin: ${({expanded}) => expanded ? '5px 0 0 150px' : '5px 0 0 5px'};
+        transition: margin .9s;
 
         &:hover {
             cursor: pointer;
