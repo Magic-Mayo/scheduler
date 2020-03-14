@@ -7,10 +7,14 @@ import Nav from './components/Nav';
 import Calendar from './components/Calendar';
 import {Wrapper} from './components/styledComponents';
 import {UserContext, InstructorContext, CurrentInstructorContext} from './Context';
+import {faSync, faHome, faChalkboardTeacher, faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';
+import {library} from '@fortawesome/fontawesome-svg-core';
+
+library.add(faSync, faHome, faChalkboardTeacher, faArrowLeft, faArrowRight);
 
 function App() {
     const [user, setUser] = useState();
-    const [instructor, setInstructor] = useState([{id: 13786, name: 'Mike Mayo'}, {name: 'you', id: 2}]);
+    const [instructor, setInstructor] = useState();
     const [currentInstructor, setCurrentInstructor] = useState();
     let location = useLocation();
 
