@@ -15,6 +15,7 @@ const Modal = props => {
         boxShadow='rgba(0,0,0,.7) 0 20px 15px 10px'
         padding='10px'
         justifyContent='space-evenly'
+        maxWidth='70vw'
         >
             {props.children}
         </Wrapper>
