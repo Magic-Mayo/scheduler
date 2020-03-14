@@ -24,8 +24,8 @@ export default styled.button`
     
     &.today {
         border-color: #000;
-        border-style: dashed;
-        border-width: 2px;
+        border-style: dotted;
+        border-width: 3px;
     }
     
     ${({calendar}) => !calendar ?
