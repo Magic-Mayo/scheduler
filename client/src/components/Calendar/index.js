@@ -11,9 +11,10 @@ import {
 } from 'date-fns';
 import { Wrapper, Button, P, Input } from '../styledComponents';
 import Modal from '../Modal';
-import {useHistory, useLocation, useParams, Link} from 'react-router-dom';
+import {useHistory, useLocation, Link} from 'react-router-dom';
 import {InstructorContext, UserContext, CurrentInstructorContext} from '../../Context';
 import axios from 'axios';
+import {FontAwesomeIcon as FAIcon} from '@fortawesome/react-fontawesome';
 
 const days = [
     'Sun',
@@ -25,19 +26,21 @@ const days = [
     'Sat'
 ]
 
-
 const Calendar = () => {
     const {instructor} = useContext(InstructorContext);
-    const {currentInstructor, setCurrentInstructor} = useContext(CurrentInstructorContext);
+    const {currentInstructor} = useContext(CurrentInstructorContext);
     const {user} = useContext(UserContext);
     const [selectedMonth, setSelectedMonth] = useState(new Date());
     const [dateClicked, setDateClicked] = useState();
     const [availableDays, setAvailableDays] = useState([]);
     const [selectedTime, setSelectedTime] = useState();
-    const [topic, setTopic] = useState();
+    const [topic, setTopic] = useState('');
+    const [timeToSchedule, setTimeToSchedule] = useState();
+    const [refresh, setRefresh] = useState(false);
     const history = useHistory();
     let location = useLocation();
-    let {instructorId} = useParams();
+
+    const handleInput = e => {e.persist();setTopic(prevState => ({...prevState, [e.target.name]: e.target.value}))};
 
     const getDays = () => {
         return (
@@ -66,14 +69,14 @@ const Calendar = () => {
                 const today = currentDay;
                 const availableDate = availableDays?.days?.filter(date =>
                     dateFormat(new Date(date.date), 'MMddyyyy') === dateFormat(currentDay, 'MMddyyyy')).length;
+
                 numberedDate = dateFormat(currentDay, 'd');
-                console.log(availableDate)
                 days.push(
                     availableDate ?
                         <Link
                         className='link'
                         key={currentDay}
-                        to={`/student/calendar/${instructorId}/${dateFormat(currentDay, 'MMddyyyy')}`}
+                        to={`/student/calendar/${currentInstructor.id}/${dateFormat(currentDay, 'MMddyyyy')}`}
                         >
                             <Button
                             className={dateFormat(selectedMonth, 'MMddyyyy') === dateFormat(currentDay, 'MMddyyyy') ? 'today' : ''}
@@ -87,7 +90,6 @@ const Calendar = () => {
                             borderLeft={i !== 0 ? '.25px solid #ccc' : ''}
                             borderRight={i !== 6 ? '.25px solid #ccc' : ''}
                             h='100%'
-                            w='100%'
                             disp='flex'
                             justifyContent='flex-end'
                             noCursor={!availableDate}
@@ -96,7 +98,7 @@ const Calendar = () => {
                             </Button>
                         </Link>
                     :
-                        <Wrapper w='100%'>
+                        <Wrapper w='100%' key={currentDay}>
                             <Button
                             className={dateFormat(selectedMonth, 'MMddyyyy') === dateFormat(currentDay, 'MMddyyyy') ? 'today' : ''}
                             onClick={availableDate ? () => setDateClicked(today) : null}
@@ -109,7 +111,6 @@ const Calendar = () => {
                             borderLeft={i !== 0 ? '.25px solid #ccc' : ''}
                             borderRight={i !== 6 ? '.25px solid #ccc' : ''}
                             h='100%'
-                            w='100%'
                             disp='flex'
                             justifyContent='flex-end'
                             noCursor={!availableDate}
@@ -146,31 +147,42 @@ const Calendar = () => {
         
     }
 
-    const submitSchedule = id => {
-        axios.post(`/schedule/${id}/:date/:time`)
+    const submitSchedule = time => {
+        axios.put(
+            `/schedule/${currentInstructor.id}`,
+            {_id: time._id, date: dateClicked, topic: topic[time._id], monthStart: startMonth(selectedMonth), dayStart: time.date}
+            ).then(data => {
+                console.log(data)
+            })
     }
-
-    const scheduleTime = (time, date) => {
+        
+    const scheduleTime = time => {
+        setTimeToSchedule(time);
         setSelectedTime(
-            <Modal 
-            submitTime={() => {
-                axios.post(`/schedule/`)
-            }}
-            >
-                <P>What would you like to cover on {date} at {time.time}?</P>
+            <Modal >
+                <P
+                textAlign='center'
+                >
+                    What would you like to cover on{" "}
+                    {dateFormat(new Date(time.time), 'MMMM dd, yyyy')}{" "}
+                    at {dateFormat(new Date(time.time), 'hh:mm a')}?
+                </P>
                 <Input
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                placeholder='Topic to cover'></Input>
+                value={topic?.[time._id]}
+                onChange={handleInput}
+                type='text'
+                name={time._id}
+                placeholder='Topic to cover'
+                />
                 <Wrapper flexDirection='row'>
-                    <Button onClick={() => submitSchedule(time._id)} bgColor='#172a55'>Schedule Time!</Button>
-                    <Button onClick={() => setSelectedTime()} bgColor='#ba0c2f'>Cancel</Button>
+                    <Button margin='0 15px 0 0' onClick={() => submitSchedule(time)} bgColor='#172a55'>Schedule Time!</Button>
+                    <Button onClick={() => {setTopic(); setSelectedTime()}} bgColor='#ba0c2f'>Cancel</Button>
                 </Wrapper>
             </Modal>
         )
     }
 
-    const getTimes = () => {        
+    const getTimes = () => {
         const [today] = availableDays.days.filter(days =>
             dateFormat(new Date(days.date), 'dd') === dateFormat(dateClicked, 'dd')
         );
@@ -193,7 +205,7 @@ const Calendar = () => {
                         h='75px'
                         fontS='14px'
                         onClick={selectedTime ? null :
-                            () => scheduleTime(time, dateFormat(new Date(dateClicked), 'MMMM d'))
+                            () => scheduleTime(time)
                         }
                         noCursor={selectedTime}
                         >
@@ -205,12 +217,19 @@ const Calendar = () => {
         )
     }
 
-    // useEffect(() => {
-    //     setDateClicked(date);
-    // }, [date]);
+    useEffect(() => {
+        if(selectedTime){
+            scheduleTime(timeToSchedule);
+        } else {
+            return () => {
+                setTopic();
+                setSelectedTime();
+            }
+        }
+    },[topic]);
 
     // useEffect(() => {
-    //     fetch(`/availability/${dateFormat(selectedMonth, 'MMddyyyy')}/${instructorId}/`).then(dates => {
+    //     fetch(`/availability/${dateFormat(selectedMonth, 'MMddyyyy')}/${currentInstructor.id}/`).then(dates => {
     //         setAvailability(dates);
     //     })
     // }, [currentInstructor, selectedMonth]);
@@ -223,10 +242,11 @@ const Calendar = () => {
     // },[currentInstructor])
     
     useEffect(() => {
+        console.log('hey')
         axios.get(`/availability/${selectedMonth}/${currentInstructor.id}`).then(newMonth => {
             setAvailableDays(newMonth.data);
         });
-    }, [selectedMonth])
+    }, [selectedMonth, refresh])
     
     // useEffect(() => {
     //     fetch({
@@ -239,9 +259,11 @@ const Calendar = () => {
     // }, [time]);
 
     useEffect(() => {
-        if(location.pathname === `/student/calendar/${instructorId}`){
+        if(!location.pathname.split('/')[4]){
             setDateClicked();
             setSelectedTime();
+            setTopic();
+            setTimeToSchedule();
         }
     },[location.pathname]);
 
@@ -255,7 +277,15 @@ const Calendar = () => {
             bgColor={selectedTime ? '#ccc' : ''}
             onClick={selectedTime ? () => setSelectedTime() : null}
             >
-                <Wrapper top='5%' position='absolute' fontS='32px'>Welcome back, {user.name}!</Wrapper>
+                <Wrapper
+                top='5%'
+                position='absolute'
+                fontS='32px'
+                textAlign='center'
+                >
+                    Welcome back, {user.name}!
+                </Wrapper>
+
                 {dateClicked &&
                     <Button
                     onClick={selectedTime ? null : () => {history.goBack(); setDateClicked()}}
@@ -268,23 +298,26 @@ const Calendar = () => {
                     </P>
                 }
                 <Wrapper
-                grid={location.pathname === `/student/calendar/${instructorId}` ? 'grid' : ''}
+                grid={location.pathname === `/student/calendar/${currentInstructor.id}` ? 'grid' : ''}
                 w='80%'
                 border='solid 2px #666'
                 h='60%'
-                display={location.pathname === `/student/calendar/${instructorId}` ? 'grid' : ''}
+                display={location.pathname === `/student/calendar/${currentInstructor.id}` ? 'grid' : ''}
                 flexDirection={dateClicked ? 'row' : ''}
                 boxShadow='#ccc 10px 10px 15px'
                 flexWrap={dateClicked ? 'wrap' : ''}
                 >
-                {location.pathname === `/student/calendar/${instructorId}` ?
+                {location.pathname === `/student/calendar/${currentInstructor.id}` ?
                     <>
                         <Wrapper
                         className='calendar-month'
                         gridColumn='1/8'
                         flexDirection='row'
                         justifyContent='space-around'
-                        fontS='200%'>
+                        fontS='200%'
+                        position='relative'
+                        >
+                            <FAIcon onClick={() => setRefresh(!refresh)} className='refresh' icon='sync' />
                             <span onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}>&lt;</span>
                             <span>{dateFormat(selectedMonth, 'LLLL yyyy')}</span>
                             <span onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}>&gt;</span>
@@ -292,12 +325,63 @@ const Calendar = () => {
                         {getDays()}
                         {populateCalendar()}
                     </>
-                :
+                : dateClicked &&
                     <>
                         {getTimes()}
                     </>
                 }
                 </Wrapper>
+                
+                {location.pathname === `/student/calendar/${currentInstructor.id}` &&
+                    <Wrapper
+                    position='absolute'
+                    bottom='0'
+                    w='80%'
+                    flexDirection='row'
+                    justifyContent='space-evenly'
+                    margin='10px 0'
+                    >
+                        <Wrapper
+                        w='60px'
+                        >
+                            <Wrapper
+                            w='50px'
+                            h='50px'
+                            border='#000 dotted 3px'
+                            className='legend-today'
+                            boxShadow='rgba(0,0,0,.8) 0 2px 15px 5px'
+                            margin='15px 0'
+                            />
+                            <span>Current Day</span>
+                        </Wrapper>
+                        
+                        <Wrapper
+                        w='60px'
+                        >
+                            <Wrapper
+                            w='50px'
+                            h='50px'
+                            bgColor='#ba0c2f'
+                            boxShadow='rgba(0,0,0,.8) 0 2px 15px 5px'
+                            margin='15px 0'
+                            />
+                            <span>No time available</span>
+                        </Wrapper>
+
+                        <Wrapper
+                        w='60px'
+                        >
+                            <Wrapper
+                            w='50px'
+                            h='50px'
+                            bgColor='#fff'
+                            boxShadow='rgba(0,0,0,.8) 0 2px 15px 5px'
+                            margin='15px 0'
+                            />
+                            <span>Time available</span>
+                        </Wrapper>
+                    </Wrapper>
+                }
             </Wrapper>
         </>
     )
