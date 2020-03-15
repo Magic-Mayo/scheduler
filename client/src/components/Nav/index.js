@@ -1,7 +1,7 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Nav, Button, P} from '../styledComponents';
 import {InstructorContext, UserContext} from '../../Context';
-import {Link} from 'react-router-dom';
+import {Link, useLocation} from 'react-router-dom';
 import {FontAwesomeIcon as FAIcon} from '@fortawesome/react-fontawesome';
 
 const NavBar = () => {
@@ -9,6 +9,11 @@ const NavBar = () => {
     const [instructorExpand, setInstructorExpand] = useState(false);
     const {instructor} = useContext(InstructorContext);
     const {user, setUser} = useContext(UserContext);
+    const location = useLocation();
+
+    useEffect(() => {
+        setExpanded(false);
+    }, [location.pathname])
 
     return (
         <Nav
@@ -37,7 +42,7 @@ const NavBar = () => {
                 {user ? user.name : 'Please Login'}
             </P>
             <Link
-            to='/'
+            to='/student'
             >
                 <Button
                 h='50px'
@@ -57,7 +62,10 @@ const NavBar = () => {
             textAlign='left'
             bgColor='inherit'
             fontS='25px'
-            onClick={() => setInstructorExpand(!instructorExpand)}
+            onClick={() => {
+                setExpanded(instructor ? true : !expanded && false);
+                setInstructorExpand(instructor ? !instructorExpand : false)
+            }}
             >
                 <FAIcon icon='chalkboard-teacher' />
                 <P fontS='24px' margin='0 0 0 20px'>Instructor</P>
@@ -72,6 +80,7 @@ const NavBar = () => {
                         margin='0 0 0 50px'
                         fontS='18px'
                         fontColor='#fff'
+                        whiteSpace='nowrap'
                         >
                             - {ins.name}
                         </P>
