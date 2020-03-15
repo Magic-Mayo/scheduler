@@ -6,11 +6,6 @@ const StaffSchema = new Schema({
     name: {type: String, require: true},
     email: {type: String, require: true},
     pass: {type: String, required: true},
-    students: [{
-        name: {type: String, require: true},
-        email: {type: String, require: true},
-        id: {type: String, require: true}
-    }],
     schedule: [{
         month: {type: Date, require: true},
         days: [{
