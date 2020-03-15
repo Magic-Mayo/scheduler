@@ -10,4 +10,5 @@ export default styled.p`
     color: ${({fontColor}) => fontColor || ''};
     margin: ${({margin}) => margin || ''};
     padding: ${({padding}) => padding || ''};
+    white-space: ${({whiteSpace}) => whiteSpace || ''};
 `
