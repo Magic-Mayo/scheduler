@@ -21,6 +21,7 @@ export default styled.button`
     position: ${({position}) => position || ''};
     bottom: ${({bottom}) => bottom || ''};
     border-color: ${({borderColor}) => borderColor || ''};
+    max-width: ${({maxWidth}) => maxWidth || ''};
     
     &.today {
         border-color: #000;
