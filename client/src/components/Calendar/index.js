@@ -7,7 +7,7 @@ import {
     format as dateFormat,
     addDays,
     addMonths,
-    subMonths,
+    subMonths
 } from 'date-fns';
 import { Wrapper, Button, P, Input } from '../styledComponents';
 import Modal from '../Modal';
@@ -34,13 +34,18 @@ const Calendar = () => {
     const [dateClicked, setDateClicked] = useState();
     const [availableDays, setAvailableDays] = useState([]);
     const [selectedTime, setSelectedTime] = useState();
-    const [topic, setTopic] = useState('');
+    const [topic, setTopic] = useState({});
     const [timeToSchedule, setTimeToSchedule] = useState();
     const [refresh, setRefresh] = useState(false);
     const history = useHistory();
     let location = useLocation();
 
-    const handleInput = e => {e.persist();setTopic(prevState => ({...prevState, [e.target.name]: e.target.value}))};
+    const handleInput = e => {
+        e.persist();
+        setTopic(prevState => {
+            return {...prevState, [e.target.name]: e.target.value}
+        });
+    };
 
     const getDays = () => {
         return (
@@ -69,7 +74,6 @@ const Calendar = () => {
                 const today = currentDay;
                 const availableDate = availableDays?.days?.filter(date =>
                     dateFormat(new Date(date.date), 'MMddyyyy') === dateFormat(currentDay, 'MMddyyyy')).length;
-
                 numberedDate = dateFormat(currentDay, 'd');
                 days.push(
                     availableDate ?
@@ -81,11 +85,12 @@ const Calendar = () => {
                             <Button
                             className={dateFormat(selectedMonth, 'MMddyyyy') === dateFormat(currentDay, 'MMddyyyy') ? 'today' : ''}
                             onClick={availableDate ? () => setDateClicked(today) : null}
-                            bgColor={availableDate || dateFormat(currentDay, 'MM') !== dateFormat(startOfMonth, 'MM') ?
+                            bgColor={parseInt(dateFormat(new Date(currentDay), 'd')) - parseInt(dateFormat(new Date(), 'd')) >= 0 &&availableDate || dateFormat(currentDay, 'MM') !== dateFormat(startOfMonth, 'MM') ?
                                 '#fff' : '#ba0c2f'}
                             calendar
                             w='100%'
-                            fontColor={dateFormat(currentDay, 'MM') === dateFormat(startOfMonth, 'MM') ? '#000' : 'rgba(0,0,0,.2)'}
+                            fontColor={dateFormat(currentDay, 'MM') === dateFormat(startOfMonth, 'MM') ?
+                                '#000' : 'rgba(0,0,0,.2)'}
                             borderRadius='0'
                             borderLeft={i !== 0 ? '.25px solid #ccc' : ''}
                             borderRight={i !== 6 ? '.25px solid #ccc' : ''}
@@ -148,38 +153,22 @@ const Calendar = () => {
     }
 
     const submitSchedule = time => {
+        time.topic = topic[time._id];
+        time.studentName = user.name;
+        time.email = user.email;
+
         axios.put(
             `/schedule/${currentInstructor.id}`,
-            {_id: time._id, date: dateClicked, topic: topic[time._id], monthStart: startMonth(selectedMonth), dayStart: time.date}
+            {_id: time._id, date: time.time, topic: topic[time._id], month: startMonth(selectedMonth), dayStart: time.date}
             ).then(data => {
                 console.log(data)
             })
     }
         
     const scheduleTime = time => {
+        setTopic(prevState => ({...prevState, [time._id]: ''}))
         setTimeToSchedule(time);
-        setSelectedTime(
-            <Modal >
-                <P
-                textAlign='center'
-                >
-                    What would you like to cover on{" "}
-                    {dateFormat(new Date(time.time), 'MMMM dd, yyyy')}{" "}
-                    at {dateFormat(new Date(time.time), 'hh:mm a')}?
-                </P>
-                <Input
-                value={topic?.[time._id]}
-                onChange={handleInput}
-                type='text'
-                name={time._id}
-                placeholder='Topic to cover'
-                />
-                <Wrapper flexDirection='row'>
-                    <Button margin='0 15px 0 0' onClick={() => submitSchedule(time)} bgColor='#172a55'>Schedule Time!</Button>
-                    <Button onClick={() => {setTopic(); setSelectedTime()}} bgColor='#ba0c2f'>Cancel</Button>
-                </Wrapper>
-            </Modal>
-        )
+        setSelectedTime(true);
     }
 
     const getTimes = () => {
@@ -205,7 +194,7 @@ const Calendar = () => {
                         h='75px'
                         fontS='14px'
                         onClick={selectedTime ? null :
-                            () => scheduleTime(time)
+                            () => {scheduleTime(time)}
                         }
                         noCursor={selectedTime}
                         >
@@ -217,16 +206,17 @@ const Calendar = () => {
         )
     }
 
-    useEffect(() => {
-        if(selectedTime){
-            scheduleTime(timeToSchedule);
-        } else {
-            return () => {
-                setTopic();
-                setSelectedTime();
-            }
-        }
-    },[topic]);
+    // useEffect(() => {
+    //     if(selectedTime){
+    //         scheduleTime(timeToSchedule);
+    //     } 
+    //     else {
+    //         return () => {
+    //             setTopic();
+    //             setSelectedTime();
+    //         }
+    //     }
+    // },[topic]);
 
     // useEffect(() => {
     //     fetch(`/availability/${dateFormat(selectedMonth, 'MMddyyyy')}/${currentInstructor.id}/`).then(dates => {
@@ -242,9 +232,10 @@ const Calendar = () => {
     // },[currentInstructor])
     
     useEffect(() => {
-        console.log('hey')
         axios.get(`/availability/${selectedMonth}/${currentInstructor.id}`).then(newMonth => {
+            console.log(newMonth.data)
             setAvailableDays(newMonth.data);
+
         });
     }, [selectedMonth, refresh])
     
@@ -269,7 +260,40 @@ const Calendar = () => {
 
     return (
         <>
-            {selectedTime && selectedTime}
+            {selectedTime && 
+            <Modal >
+                <P
+                textAlign='center'
+                >
+                    What would you like to cover on{" "}
+                    {dateFormat(new Date(timeToSchedule.time), 'MMMM dd, yyyy')}{" "}
+                    at {dateFormat(new Date(timeToSchedule.time), 'hh:mm a')}?
+                </P>
+                <Input
+                onChange={handleInput}
+                value={topic[timeToSchedule._id]}
+                type='text'
+                name={timeToSchedule._id}
+                placeholder='Topic to cover'
+                />
+                <Wrapper flexDirection='row'>
+                    <Button
+                    margin='0 15px 0 0'
+                    onClick={() => submitSchedule(timeToSchedule)}
+                    bgColor='#172a55'
+                    >
+                        Schedule Time!
+                    </Button>
+
+                    <Button
+                    onClick={() => {setTopic(); setSelectedTime()}}
+                    bgColor='#ba0c2f'
+                    >
+                        Cancel
+                    </Button>
+                </Wrapper>
+            </Modal>
+            }
             <Wrapper
             w='100%'
             h='100%'
