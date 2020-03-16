@@ -7,7 +7,7 @@ const StudentsSchema = new Schema({
     id: {type: String, require: true},
     staff: [{
         id: {type: String, require: true},
-        name: {type: String, require: true},
+        name: {type: String, require: true}
     }]
 })
 
