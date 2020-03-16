@@ -54,6 +54,9 @@ const Student = () => {
                             bgColor='#172a55'
                             borderRadius='7px'
                             textAlign='center'
+                            w='auto'
+                            maxWidth='150px'
+                            h='auto'
                             >
                                 {ins.name}
                             </Button>
