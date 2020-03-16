@@ -13,6 +13,7 @@ const NavBar = () => {
 
     useEffect(() => {
         setExpanded(false);
+        setInstructorExpand(false);
     }, [location.pathname])
 
     return (
