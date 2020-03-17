@@ -3,12 +3,9 @@ const app = express();
 const mongoose = require('mongoose');
 const PORT = process.env.PORT || 3001;
 const path = require('path');
-const mongo = require('mongojs');
 
-mongo('scheduler', ['staffs', 'students']).on('error', err => console.error(err))
-
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/scheduler";
-mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost/scheduler';
+mongoose.connect(MONGODB_URI, { useFindAndModify: false, useNewUrlParser: true, useUnifiedTopology: true });
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
