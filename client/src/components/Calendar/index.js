@@ -15,6 +15,7 @@ import {useHistory, useLocation, Link} from 'react-router-dom';
 import {InstructorContext, UserContext, CurrentInstructorContext} from '../../Context';
 import axios from 'axios';
 import {FontAwesomeIcon as FAIcon} from '@fortawesome/react-fontawesome';
+import {HashLoader as Loading} from 'react-spinners';
 
 const days = [
     'Sun',
@@ -37,6 +38,7 @@ const Calendar = () => {
     const [topic, setTopic] = useState({});
     const [timeToSchedule, setTimeToSchedule] = useState();
     const [refresh, setRefresh] = useState(false);
+    const [loading, setLoading] = useState(false);
     const history = useHistory();
     let location = useLocation();
 
@@ -156,37 +158,37 @@ const Calendar = () => {
     }
 
     const submitSchedule = time => {
+        setLoading(true);
         time.topic = topic[time._id];
         time.studentName = user.name;
         time.email = user.email;
         let daysIdx, timesIdx;
-        const schedule = availableDays;
 
-        schedule.days.map((day, ind) => {
+        availableDays.days.map((day, ind) => {
             if(dateFormat(new Date(day.date), 'MMdd') === dateFormat(new Date(dateClicked), 'MMdd')){
                 daysIdx = ind;
                 return day.times.map((times, ind) => {
-                    if(dateFormat(new Date(times.time), 'hhmm') === dateFormat(new Date(time.time), 'hhmm')){
+                    if(dateFormat(new Date(times.time), 'HHmm') === dateFormat(new Date(time.time), 'HHmm')){
                         return timesIdx = ind;
                     }
                 })
             }
         })
 
-        axios.put(`/schedule/${currentInstructor.id}/${user.id}`,
-        {
-            month: availableDays._id,
-            daysIdx,
-            timesIdx,
-            topic: time.topic,
-            studentName: time.studentName,
-            studentEmail: time.email,
-            timeId: time._id,
-            time: time.time
-        }).then(data => {
-                console.log(data.data)
-            }
-        )
+        // axios.put(`/schedule/${currentInstructor.id}/${user.id}`,
+        // {
+        //     month: availableDays._id,
+        //     daysIdx,
+        //     timesIdx,
+        //     topic: time.topic,
+        //     studentName: time.studentName,
+        //     studentEmail: time.email,
+        //     timeId: time._id,
+        //     time: time.time
+        // }).then(data => {
+
+        //     // setLoading(false);
+        // })
     }
         
     const scheduleTime = time => {
@@ -199,7 +201,6 @@ const Calendar = () => {
         const [today] = availableDays.days.filter(days =>
             dateFormat(new Date(days.date), 'dd') === dateFormat(dateClicked, 'dd')
         );
-        console.log(today)
 
         return (
             <>
@@ -301,20 +302,29 @@ const Calendar = () => {
                 placeholder='Topic to cover'
                 />
                 <Wrapper flexDirection='row'>
-                    <Button
-                    margin='0 15px 0 0'
-                    onClick={() => submitSchedule(timeToSchedule)}
-                    bgColor='#172a55'
-                    >
-                        Schedule Time!
-                    </Button>
+                    {loading ?
+                        <Loading
+                        loading
+                        color='#172a55'
+                        />
+                    :
+                        <>
+                            <Button
+                            margin='0 15px 0 0'
+                            onClick={() => submitSchedule(timeToSchedule)}
+                            bgColor='#172a55'
+                            >
+                                Schedule Time!
+                            </Button>
 
-                    <Button
-                    onClick={() => {setTopic(); setSelectedTime()}}
-                    bgColor='#ba0c2f'
-                    >
-                        Cancel
-                    </Button>
+                            <Button
+                            onClick={() => {setTopic(); setSelectedTime()}}
+                            bgColor='#ba0c2f'
+                            >
+                                Cancel
+                            </Button>
+                        </>
+                    }
                 </Wrapper>
             </Modal>
             }
@@ -323,7 +333,7 @@ const Calendar = () => {
             h='100%'
             margin='0 0 0 35px'
             bgColor={selectedTime ? '#ccc' : ''}
-            onClick={selectedTime ? () => setSelectedTime() : null}
+            onClick={selectedTime && !loading ? () => setSelectedTime() : null}
             >
                 <Wrapper
                 top='5%'
@@ -340,12 +350,16 @@ const Calendar = () => {
                     noCursor={selectedTime}
                     >Back to Calendar</Button>
                 }
+
                 {!dateClicked &&
                     <P>
                         {`${currentInstructor.name}'s calendar`}
                     </P>
                 }
+                
                 <Wrapper
+                maxWidth='980px'
+                minWidth='300px'
                 grid={location.pathname === `/student/calendar/${currentInstructor.id}` ? 'grid' : ''}
                 w='80%'
                 border='solid 2px #666'
@@ -382,11 +396,12 @@ const Calendar = () => {
                 
                 {location.pathname === `/student/calendar/${currentInstructor.id}` &&
                     <Wrapper
+                    maxWidth='980px'
                     position='absolute'
                     bottom='0'
-                    w='80%'
+                    w='77%'
                     flexDirection='row'
-                    justifyContent='space-evenly'
+                    justifyContent='space-around'
                     margin='10px 0'
                     >
                         <Wrapper
