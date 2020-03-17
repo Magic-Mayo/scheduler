@@ -206,6 +206,9 @@ const Calendar = () => {
     const getTimes = () => {
         const [today] = availableDays.days.filter(days =>
             dateFormat(new Date(days.date), 'dd') === dateFormat(dateClicked, 'dd')
+        )
+        const sortedTimes = today.times.sort((a,b) => 
+            parseInt(dateFormat(new Date(a.time), 'H')) - parseInt(dateFormat(new Date(b.time), 'H'))
         );
 
         return (
@@ -220,7 +223,7 @@ const Calendar = () => {
                 </P>
             
                 <Wrapper w='100%'>
-                    {today.times.filter(avail => !avail.studentEmail)
+                    {sortedTimes.filter(avail => !avail.studentEmail)
                     .map(time => (
                         <Button
                         key={time._id}
