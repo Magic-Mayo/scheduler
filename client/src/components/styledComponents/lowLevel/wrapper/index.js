@@ -35,13 +35,4 @@ export default styled.div`
             cursor: pointer
         }
     }
-
-    .refresh {
-        position: absolute;
-        left: 25px;
-
-        &:hover {
-            cursor: pointer;
-        }
-    }
 `
