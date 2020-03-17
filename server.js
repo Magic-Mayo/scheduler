@@ -18,7 +18,6 @@ if (process.env.NODE_ENV === "production") {
 require('./routes/index')(app);
 
 app.get("*", (req, res) => {
-    console.log('nogo')
     res.sendFile(path.join(__dirname, "./client/public/index.html"));
 });
 
