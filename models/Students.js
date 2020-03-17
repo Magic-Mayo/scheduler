@@ -8,6 +8,12 @@ const StudentsSchema = new Schema({
     staff: [{
         id: {type: String, require: true},
         name: {type: String, require: true}
+    }],
+    scheduledTimes: [{
+        time: {type: Date, required: true},
+        instructorId: {type: String, require: true},
+        timeId: {type: String, require: true},
+        satisfied: Boolean
     }]
 })
 
