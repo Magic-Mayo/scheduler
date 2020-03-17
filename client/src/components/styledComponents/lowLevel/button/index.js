@@ -22,6 +22,7 @@ export default styled.button`
     bottom: ${({bottom}) => bottom || ''};
     border-color: ${({borderColor}) => borderColor || ''};
     max-width: ${({maxWidth}) => maxWidth || ''};
+    align-items: ${({alignItems}) => alignItems || ''};
     
     &.today {
         border-color: #000;
