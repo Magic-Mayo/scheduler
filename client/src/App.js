@@ -35,7 +35,8 @@ function App() {
                         <Nav />
                     }
                         <Route exact path='/'>
-                            <Home />
+                            <Redirect to='/student' />
+                            {/* <Home /> */}
                         </Route>
                         <Switch>
                             <Route path='/admin'>
