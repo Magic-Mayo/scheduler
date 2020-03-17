@@ -20,14 +20,14 @@ function App() {
     const [refresh, setRefresh] = useState(false);
     let location = useLocation();
 
-    useEffect(() => {
-        // if(user === null){
-        //     localStorage.removeItem('user')
-        // }
-        if(localStorage.getItem('user')){
-            setUser(JSON.parse(localStorage.getItem('user')))
-        }
-    }, [user]);
+    // useEffect(() => {
+    //     // if(user === null){
+    //     //     localStorage.removeItem('user')
+    //     // }
+    //     if(localStorage.getItem('user')){
+    //         setUser(JSON.parse(localStorage.getItem('user')))
+    //     }
+    // }, [user]);
 
     // useEffect(() => {
     //     if(localStorage.getItem('user')) setUser(localStorage.getItem('user'));
