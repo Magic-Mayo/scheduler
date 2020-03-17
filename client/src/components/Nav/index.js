@@ -89,43 +89,82 @@ const NavBar = () => {
                     </Link>
                 ))
             }
-            {/* <Link
-            to={loading ? location.pathname : '/student/mycalendar'}
-            >
-                <Button
-                bgColor='inherit'
-                padding='5px 0 5px 12px'
-                disp='flex'
-                w='100%'
-                fontS='24px'
+            {user ?
+                <Link
+                to={loading ? location.pathname : '/student/myschedule'}
                 >
-                    <FAIcon icon='calendar-alt' color='#fff' />
-                    <P
-                    margin='0 0 0 23px'
+                    <Button
+                    bgColor='inherit'
+                    padding='5px 0 5px 12px'
+                    disp='flex'
+                    w='100%'
                     fontS='24px'
-                    whiteSpace='nowrap'
                     >
-                        My Calendar
-                    </P>
-                </Button>
-            </Link> */}
+                        <FAIcon icon='calendar-alt' color='#fff' />
+                        <P
+                        margin='0 0 0 23px'
+                        fontS='24px'
+                        whiteSpace='nowrap'
+                        >
+                            My Schedule
+                        </P>
+                    </Button>
+                </Link>
+            :
+                <Wrapper
+                w='100%'
+                >
+                    <Button
+                    bgColor='inherit'
+                    padding='5px 0 5px 12px'
+                    disp='flex'
+                    w='100%'
+                    fontS='24px'
+                    >
+                        <FAIcon icon='calendar-alt' color='#fff' />
+                        <P
+                        margin='0 0 0 23px'
+                        fontS='24px'
+                        whiteSpace='nowrap'
+                        >
+                            My Schedule
+                        </P>
+                    </Button>
+                </Wrapper>
+            }
             {location.pathname.split('student/')[1] &&
-                <Button
+                <Wrapper
+                h='100%'
                 w='100%'
                 disp='flex'
+                padding='0 0 130px 0'
                 flexDirection='row'
-                padding='5px 8px'
-                fontS='24px'
-                bgColor='inherit'
+                alignItems='flex-end'
+                fontColor='#fff'
                 onClick={() => setRefresh(!refresh)}
                 >
-                    <FAIcon
-                    color='#fff'
-                    className='refresh'
-                    icon='sync'
-                    />
-                    <P margin='0 0 0 23px' fontS='24px'>Refresh</P>
-                </Button>
+                    <Button
+                    w='100%'
+                    padding='5px 0 5px 9px'
+                    fontS='24px'
+                    bgColor='inherit'
+                    disp='flex'
+                    flexDirection='row'
+                    alignItems='center'
+                    >
+                        <FAIcon
+                        className='refresh'
+                        icon='sync'
+                        />
+                        <P
+                        margin='0 0 0 26px'
+                        fontS='24px'
+                        
+                        >
+                            Refresh Calendar
+                        </P>
+                    </Button>
+                </Wrapper>
             }
             {user &&
                 <Button
