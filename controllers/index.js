@@ -4,8 +4,6 @@ const Students = require('../models/Students');
 const axios = require('axios');
 const bcrypt = require('bcrypt');
 const {format} = require('date-fns');
-const mongoose = require('mongoose');
-const mongo = require('mongodb');
 
 module.exports = {
     addNewStudents: async (req, res) => {
@@ -125,12 +123,6 @@ module.exports = {
         }).catch(err => {
             res.json(err);
         })
-
-        // Staff.aggregate([{$project: {a: 1}},{$match: {_id: mongoose.Types.ObjectId(req.body.id)}}])
-        // .exec(data => {
-        //     res.json(data);
-        // })
-        // ).catch(err => console.error(err))
     },
 
     scheduleTime: (req, res) => {
@@ -143,8 +135,6 @@ module.exports = {
             studentName: studentName,
             time: time
         };
-        console.log(set)
-
         
         Staff.findOneAndUpdate(
             {id: instructorId, 'schedule._id': month},
