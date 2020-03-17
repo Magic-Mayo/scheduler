@@ -14,7 +14,6 @@ import Modal from '../Modal';
 import {useHistory, useLocation, Link} from 'react-router-dom';
 import {InstructorContext, UserContext, CurrentInstructorContext} from '../../Context';
 import axios from 'axios';
-import {FontAwesomeIcon as FAIcon} from '@fortawesome/react-fontawesome';
 import {HashLoader as Loading} from 'react-spinners';
 
 const days = [
@@ -28,7 +27,7 @@ const days = [
 ]
 
 const Calendar = () => {
-    const {instructor} = useContext(InstructorContext);
+    const {instructor, loading, refresh, setLoading, setRefresh} = useContext(InstructorContext);
     const {currentInstructor} = useContext(CurrentInstructorContext);
     const {user} = useContext(UserContext);
     const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -37,8 +36,8 @@ const Calendar = () => {
     const [selectedTime, setSelectedTime] = useState();
     const [topic, setTopic] = useState({});
     const [timeToSchedule, setTimeToSchedule] = useState();
-    const [refresh, setRefresh] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [timeScheduled, setTimeScheduled] = useState();
+    const [error, setError] = useState();
     const history = useHistory();
     let location = useLocation();
 
@@ -175,20 +174,27 @@ const Calendar = () => {
             }
         })
 
-        // axios.put(`/schedule/${currentInstructor.id}/${user.id}`,
-        // {
-        //     month: availableDays._id,
-        //     daysIdx,
-        //     timesIdx,
-        //     topic: time.topic,
-        //     studentName: time.studentName,
-        //     studentEmail: time.email,
-        //     timeId: time._id,
-        //     time: time.time
-        // }).then(data => {
+        axios.put(`/schedule/${currentInstructor.id}/${user.id}`,
+        {
+            month: availableDays._id,
+            daysIdx,
+            timesIdx,
+            topic: time.topic,
+            studentName: time.studentName,
+            studentEmail: time.email,
+            timeId: time._id,
+            time: time.time
+        }).then(data => {
+            console.log(data.data)
+            if(data.data.staff /* && data.data.student */){
+                setRefresh(!refresh);
+                setLoading(false);
+                return setTimeScheduled(true);
+            }
 
-        //     // setLoading(false);
-        // })
+            setError('There was a problem scheduling the time.  Please check that the time is still available and try again.')
+            setRefresh(!refresh)
+        })
     }
         
     const scheduleTime = time => {
@@ -288,19 +294,28 @@ const Calendar = () => {
             {selectedTime && 
             <Modal >
                 <P
+                opacity={loading ? '.5' : ''}
                 textAlign='center'
                 >
-                    What would you like to cover on{" "}
-                    {dateFormat(new Date(timeToSchedule.time), 'MMMM dd, yyyy')}{" "}
-                    at {dateFormat(new Date(timeToSchedule.time), 'hh:mm a')}?
+                    {timeScheduled ?
+                        `Your time has been reserved for ${dateFormat(new Date(timeToSchedule.time), 'hh:mm a')} on${' '}
+                        ${dateFormat(new Date(timeToSchedule.time), 'MMMM dd, yyyy')}!`
+                    :
+                        `What would you like to cover on${" "}
+                        ${dateFormat(new Date(timeToSchedule.time), 'MMMM dd, yyyy')}${" "}
+                        at ${dateFormat(new Date(timeToSchedule.time), 'hh:mm a')}?`
+                    }
                 </P>
-                <Input
-                onChange={handleInput}
-                value={topic[timeToSchedule._id]}
-                type='text'
-                name={timeToSchedule._id}
-                placeholder='Topic to cover'
-                />
+                {!timeScheduled &&
+                    <Input
+                    opacity={loading ? '.5' : ''}
+                    onChange={handleInput}
+                    value={topic[timeToSchedule._id]}
+                    type='text'
+                    name={timeToSchedule._id}
+                    placeholder='Topic to cover'
+                    />
+                }
                 <Wrapper flexDirection='row'>
                     {loading ?
                         <Loading
@@ -309,19 +324,25 @@ const Calendar = () => {
                         />
                     :
                         <>
-                            <Button
-                            margin='0 15px 0 0'
-                            onClick={() => submitSchedule(timeToSchedule)}
-                            bgColor='#172a55'
-                            >
-                                Schedule Time!
-                            </Button>
+                            {!timeScheduled &&
+                                <Button
+                                margin='0 15px 0 0'
+                                onClick={() => submitSchedule(timeToSchedule)}
+                                bgColor='#172a55'
+                                >
+                                    Schedule Time!
+                                </Button>
+                            }
 
                             <Button
                             onClick={() => {setTopic(); setSelectedTime()}}
                             bgColor='#ba0c2f'
                             >
-                                Cancel
+                                {timeScheduled ?
+                                    'Okay!'
+                                :
+                                    'Cancel'
+                                }
                             </Button>
                         </>
                     }
@@ -379,7 +400,6 @@ const Calendar = () => {
                         fontS='200%'
                         position='relative'
                         >
-                            <FAIcon onClick={() => setRefresh(!refresh)} className='refresh' icon='sync' />
                             <span onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}>&lt;</span>
                             <span>{dateFormat(selectedMonth, 'LLLL yyyy')}</span>
                             <span onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}>&gt;</span>
