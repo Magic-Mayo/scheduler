@@ -4,6 +4,8 @@ const Students = require('../models/Students');
 const axios = require('axios');
 const bcrypt = require('bcrypt');
 const {format} = require('date-fns');
+const mongoose = require('mongoose');
+const mongo = require('mongodb');
 
 module.exports = {
     addNewStudents: async (req, res) => {
@@ -46,20 +48,14 @@ module.exports = {
                 name: `${student.firstName} ${student.lastName}`,
                 email: student.email,
                 staff: [{
-                    name: me.data.userAccount.name,
+                    name: `${me.data.userAccount.firstName} ${me.data.userAccount.lastName}`,
                     id: me.data.userAccount.id
                 }]
             });
         });
         
         Students.create(email, {new: true}).then(data => {
-        
-            Staff.findOneAndUpdate(req.params.id, {$push: {students: email}}, {new: true, upsert: true}).then(data => {
-                return res.json(data);
-            }).catch(err => {
-                console.error(err)
-                return res.json(err);
-            });
+            res.json(data)
         }).catch(err => console.error(err))
     },
 
@@ -93,13 +89,15 @@ module.exports = {
             pass: hashed,
             students: [],
             schedule: []
-        }).then(staff => res.json(staff));
+        }).then(staff =>
+            axios.post(`/staff/${staff.id}/getstudents`, {authToken: authToken})
+            .catch(err=>console.error(err)));
 
     },
 
     findOne: (req, res) => {
         Students.findOne({email: req.params.email}).then(data => {
-            res.json({name: data.name, email: data.email});
+            res.json({name: data.name, email: data.email, staff: data.staff});
         }).catch(err => {
             console.error(err);
             return res.json(false);
@@ -109,9 +107,8 @@ module.exports = {
     getAvailability: (req,res) => {
         Staff.findOne({id: req.params.id}).then(data => {
             if(data){
-                const openDays = {};
-                const [schedule] = data.schedule.filter(val => 
-                    format(new Date(val.month), 'MMyyy') === format(new Date(req.params.date), 'MMyyyy'));
+                const [schedule] = data.schedule.filter(val => {
+                    return format(new Date(val.month), 'MMyyyy') === format(new Date(req.params.date), 'MMyyyy')})
 
                 return res.json(schedule);
             }
@@ -121,26 +118,57 @@ module.exports = {
     },
 
     setAvailability: (req, res) => {
-        Staff.findOneAndUpdate({id: req.params.id, 'schedule.month': req.params.date}, {'schedule': req.body}, {new: true, upsert: true}).then(data => {
+        const {id, date} = req.params;
+
+        Staff.findOneAndUpdate({id: id, 'schedule._id': date}, {'schedule': req.body}, {new: true}).then(data => {
             res.json(data);
         }).catch(err => {
             res.json(err);
         })
+
+        // Staff.aggregate([{$project: {a: 1}},{$match: {_id: mongoose.Types.ObjectId(req.body.id)}}])
+        // .exec(data => {
+        //     res.json(data);
+        // })
+        // ).catch(err => console.error(err))
     },
 
     scheduleTime: (req, res) => {
-        const id = req.params.id;
-        const date = req.params.date;
-        const time = req.params.time;
-        const formattedDate = date.split('').slice(-6).join('');
+        const {topic, studentName, studentEmail, month, daysIdx, timesIdx, timeId, time} = req.body;
+        const {studentId, instructorId} = req.params;
+        const set = {$set: {}};
+        set.$set[`schedule.$.days.${daysIdx}.times.${timesIdx}`] = {
+            topic: topic,
+            studentEmail: studentEmail,
+            studentName: studentName,
+            time: time
+        };
+        console.log(set)
 
-        Staff.findOne({id: id}).then(data => {
-            const [schedule] = data.schedule.filter(val => val.month === formattedDate)
-            schedule.days.filter(val => console.log(val));
-        })
+        
+        Staff.findOneAndUpdate(
+            {id: instructorId, 'schedule._id': month},
+            set,
+            {new: true}
+            ).then(data => {
+                Students.findOneAndUpdate(
+                    {id: studentId},
+                    {scheduledTimes: {
+                        $push: {
+                            instructorId: instructorId,
+                            timeId: timeId,
+                            time: time
+                        }
+                    }},
+                    {new:true}
+                ).then(student => res.json({student, data}))
+            }
+        )
     },
 
     updateAvailability: (req, res) => {
-
+        Staff.findOneAndUpdate({id: req.params.id}, {schedule: [req.body]}, {new:true}).then(data => {
+            res.json(data)
+        })
     }
 }
