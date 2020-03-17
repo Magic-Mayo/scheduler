@@ -29,6 +29,7 @@ export default styled.div`
     max-width: ${({maxWidth}) => maxWidth || ''};
     bottom: ${({bottom}) => bottom || ''};
     min-width: ${({minWidth}) => minWidth || ''};
+    color: ${({fontColor}) => fontColor || ''};
 
     &.calendar-month {
         span:first-of-type:hover, span:last-of-type:hover {
