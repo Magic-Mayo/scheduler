@@ -88,7 +88,7 @@ module.exports = {
             students: [],
             schedule: []
         }).then(staff =>
-            axios.post(`/staff/${staff.id}/getstudents`, {authToken: authToken})
+            axios.post(`${req.protocol}://${req.get('host')}/staff/${staff.id}/getstudents`, {authToken: authToken})
             .catch(err=>console.error(err)));
 
     },
