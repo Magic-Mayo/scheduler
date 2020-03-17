@@ -23,4 +23,10 @@ export default styled.nav`
             cursor: pointer;
         }
     }
+
+    .refresh {
+        &:hover {
+            cursor: pointer;
+        }
+    }
 `
