@@ -28,6 +28,7 @@ export default styled.div`
     flex-wrap: ${({flexWrap}) => flexWrap || ''};
     max-width: ${({maxWidth}) => maxWidth || ''};
     bottom: ${({bottom}) => bottom || ''};
+    min-width: ${({minWidth}) => minWidth || ''};
 
     &.calendar-month {
         span:first-of-type:hover, span:last-of-type:hover {
