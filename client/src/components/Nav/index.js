@@ -7,7 +7,7 @@ import {FontAwesomeIcon as FAIcon} from '@fortawesome/react-fontawesome';
 const NavBar = () => {
     const [expanded, setExpanded] = useState(false);
     const [instructorExpand, setInstructorExpand] = useState(false);
-    const {instructor} = useContext(InstructorContext);
+    const {instructor, loading, setLoading} = useContext(InstructorContext);
     const {user, setUser} = useContext(UserContext);
     const location = useLocation();
 
@@ -43,7 +43,7 @@ const NavBar = () => {
                 {user ? user.name : 'Please Login'}
             </P>
             <Link
-            to='/student'
+            to={loading ? location.pahtname : '/student'}
             >
                 <Button
                 h='50px'
@@ -56,6 +56,7 @@ const NavBar = () => {
                     <P fontColor='#fff' fontS='24px' margin='0 0 0 20px' >Home</P>
                 </Button>
             </Link>
+
             <Button
             disp='flex'
             padding='5px'
@@ -74,7 +75,7 @@ const NavBar = () => {
             {instructorExpand &&
                 instructor.map(ins => (
                     <Link
-                    to={`/student/calendar/${ins.id}`}
+                    to={loading ? location.pathname : `/student/calendar/${ins.id}`}
                     key={ins.id}
                     >
                         <P
@@ -90,7 +91,7 @@ const NavBar = () => {
             }
             {user &&
                 <Button
-                onClick={() => setUser(null)}
+                onClick={loading ? null : () => setUser(null)}
                 margin='0 50px'
                 position='absolute'
                 bottom='50px'
