@@ -140,7 +140,7 @@ module.exports = {
             {id: instructorId, 'schedule._id': month},
             set,
             {new: true}
-            ).then(data => {
+            ).then(staff => {
                 Students.findOneAndUpdate(
                     {id: studentId},
                     {scheduledTimes: {
@@ -151,7 +151,7 @@ module.exports = {
                         }
                     }},
                     {new:true}
-                ).then(student => res.json({student, data}))
+                ).then(student => res.json({student, staff}))
             }
         )
     },
