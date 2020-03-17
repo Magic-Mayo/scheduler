@@ -11,4 +11,5 @@ export default styled.p`
     margin: ${({margin}) => margin || ''};
     padding: ${({padding}) => padding || ''};
     white-space: ${({whiteSpace}) => whiteSpace || ''};
+    opacity: ${({opacity}) => opacity || ''};
 `

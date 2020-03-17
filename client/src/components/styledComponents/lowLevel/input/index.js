@@ -7,4 +7,5 @@ export default styled.input`
     padding: 5px;
     border-radius: 5px;
     font-size: 15px;
+    opacity: ${({opacity}) => opacity || ''};
 `
