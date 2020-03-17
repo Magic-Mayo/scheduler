@@ -3,7 +3,7 @@ const controller = require('../controllers')
 module.exports = (app) => {
     app.post('/staff/:id/getstudents', controller.addNewStudents);
     app.post('/staff/add', controller.addNewStaff);
-    app.get('/student/:email', controller.findOne);
+    app.get('/student/find/:email', controller.findOne);
     app.get('/availability/:date/:id', controller.getAvailability);
     app.put('/availability/:date/:id', controller.updateAvailability);
     app.post('/availability/:date/:id', controller.setAvailability);
