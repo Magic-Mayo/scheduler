@@ -21,7 +21,7 @@
   "bugs": {
     "url": "https://github.com/Magic-Mayo/scheduler/issues"
   },
-  "homepage": "https://github.com/Magic-Mayo/scheduler#readme",
+  "homepage": ".",
   "dependencies": {
     "axios": "^0.19.2",
     "bcrypt": "^4.0.1",
