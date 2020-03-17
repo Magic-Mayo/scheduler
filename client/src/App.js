@@ -16,6 +16,7 @@ function App() {
     const [user, setUser] = useState();
     const [instructor, setInstructor] = useState();
     const [currentInstructor, setCurrentInstructor] = useState();
+    const [loading, setLoading] = useState(false);
     let location = useLocation();
 
     useEffect(() => {
@@ -28,7 +29,7 @@ function App() {
 
     return (
         <Wrapper flexDirection='row' w='100vw' h='100vh' justifyContent='flex-start'>
-            <InstructorContext.Provider value={{instructor, setInstructor}}>
+            <InstructorContext.Provider value={{instructor, loading, setInstructor, setLoading}}>
                 <CurrentInstructorContext.Provider value={{currentInstructor, setCurrentInstructor}}>
                     <UserContext.Provider value={{user, setUser}}>
                     {location.pathname !== '/' &&
