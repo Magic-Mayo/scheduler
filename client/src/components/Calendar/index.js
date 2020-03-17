@@ -68,15 +68,21 @@ const Calendar = () => {
 
         let currentDay = startOfWeek;
         let numberedDate;
+        const available = [];
+        const date = availableDays?.days?.map(date => {
+                const filtered = date.times.filter(times => !times.studentEmail).length;
+                if(filtered){
+                    available.push(dateFormat(new Date(date.date), 'd'))
+                }
+        })
 
         while(currentDay <= endofWeek){
             for(let i = 0; i < 7; i++){
                 const today = currentDay;
-                const availableDate = availableDays?.days?.filter(date =>
-                    dateFormat(new Date(date.date), 'MMddyyyy') === dateFormat(currentDay, 'MMddyyyy')).length;
                 numberedDate = dateFormat(currentDay, 'd');
+                const time = available.includes(numberedDate);
                 days.push(
-                    availableDate ?
+                    time ?
                         <Link
                         className='link'
                         key={currentDay}
@@ -84,9 +90,8 @@ const Calendar = () => {
                         >
                             <Button
                             className={dateFormat(selectedMonth, 'MMddyyyy') === dateFormat(currentDay, 'MMddyyyy') ? 'today' : ''}
-                            onClick={availableDate ? () => setDateClicked(today) : null}
-                            bgColor={parseInt(dateFormat(new Date(currentDay), 'd')) - parseInt(dateFormat(new Date(), 'd')) >= 0 &&availableDate || dateFormat(currentDay, 'MM') !== dateFormat(startOfMonth, 'MM') ?
-                                '#fff' : '#ba0c2f'}
+                            onClick={() => setDateClicked(today)}
+                            bgColor='#fff'
                             calendar
                             w='100%'
                             fontColor={dateFormat(currentDay, 'MM') === dateFormat(startOfMonth, 'MM') ?
@@ -97,7 +102,6 @@ const Calendar = () => {
                             h='100%'
                             disp='flex'
                             justifyContent='flex-end'
-                            noCursor={!availableDate}
                             >
                                 {numberedDate}
                             </Button>
@@ -106,8 +110,7 @@ const Calendar = () => {
                         <Wrapper w='100%' key={currentDay}>
                             <Button
                             className={dateFormat(selectedMonth, 'MMddyyyy') === dateFormat(currentDay, 'MMddyyyy') ? 'today' : ''}
-                            onClick={availableDate ? () => setDateClicked(today) : null}
-                            bgColor={availableDate || dateFormat(currentDay, 'MM') !== dateFormat(startOfMonth, 'MM') ?
+                            bgColor={dateFormat(currentDay, 'MM') !== dateFormat(startOfMonth, 'MM') ?
                                 '#fff' : '#ba0c2f'}
                             calendar
                             w='100%'
@@ -118,7 +121,7 @@ const Calendar = () => {
                             h='100%'
                             disp='flex'
                             justifyContent='flex-end'
-                            noCursor={!availableDate}
+                            noCursor
                             >
                                 {numberedDate}
                             </Button>
@@ -143,7 +146,7 @@ const Calendar = () => {
             gridColumn='1/8'
             justifyContent='space-between'
             borderBottom={ind !== arr.length - 1 ? '1px solid #ccc' : ''}
-            borderTop={ind !== 0 ? '1px solid #ccc' : ''}
+            borderTop='1px solid #ccc'
             >
                 {week}
             </Wrapper>
@@ -156,13 +159,34 @@ const Calendar = () => {
         time.topic = topic[time._id];
         time.studentName = user.name;
         time.email = user.email;
+        let daysIdx, timesIdx;
+        const schedule = availableDays;
 
-        axios.put(
-            `/schedule/${currentInstructor.id}`,
-            {_id: time._id, date: time.time, topic: topic[time._id], month: startMonth(selectedMonth), dayStart: time.date}
-            ).then(data => {
-                console.log(data)
-            })
+        schedule.days.map((day, ind) => {
+            if(dateFormat(new Date(day.date), 'MMdd') === dateFormat(new Date(dateClicked), 'MMdd')){
+                daysIdx = ind;
+                return day.times.map((times, ind) => {
+                    if(dateFormat(new Date(times.time), 'hhmm') === dateFormat(new Date(time.time), 'hhmm')){
+                        return timesIdx = ind;
+                    }
+                })
+            }
+        })
+
+        axios.put(`/schedule/${currentInstructor.id}/${user.id}`,
+        {
+            month: availableDays._id,
+            daysIdx,
+            timesIdx,
+            topic: time.topic,
+            studentName: time.studentName,
+            studentEmail: time.email,
+            timeId: time._id,
+            time: time.time
+        }).then(data => {
+                console.log(data.data)
+            }
+        )
     }
         
     const scheduleTime = time => {
@@ -175,6 +199,7 @@ const Calendar = () => {
         const [today] = availableDays.days.filter(days =>
             dateFormat(new Date(days.date), 'dd') === dateFormat(dateClicked, 'dd')
         );
+        console.log(today)
 
         return (
             <>
@@ -188,7 +213,8 @@ const Calendar = () => {
                 </P>
             
                 <Wrapper w='100%'>
-                    {today.times.map(time => (
+                    {today.times.filter(avail => !avail.studentEmail)
+                    .map(time => (
                         <Button
                         key={time._id}
                         h='75px'
@@ -233,9 +259,7 @@ const Calendar = () => {
     
     useEffect(() => {
         axios.get(`/availability/${selectedMonth}/${currentInstructor.id}`).then(newMonth => {
-            console.log(newMonth.data)
             setAvailableDays(newMonth.data);
-
         });
     }, [selectedMonth, refresh])
     
