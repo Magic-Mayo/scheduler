@@ -7,20 +7,26 @@ import Nav from './components/Nav';
 import Calendar from './components/Calendar';
 import {Wrapper} from './components/styledComponents';
 import {UserContext, InstructorContext, CurrentInstructorContext} from './Context';
-import {faSync, faHome, faChalkboardTeacher, faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';
+import {faSync, faHome, faChalkboardTeacher, faArrowLeft, faArrowRight, faCalendarAlt} from '@fortawesome/free-solid-svg-icons';
 import {library} from '@fortawesome/fontawesome-svg-core';
 
-library.add(faSync, faHome, faChalkboardTeacher, faArrowLeft, faArrowRight);
+library.add(faSync, faHome, faChalkboardTeacher, faArrowLeft, faArrowRight, faCalendarAlt);
 
 function App() {
     const [user, setUser] = useState();
     const [instructor, setInstructor] = useState();
     const [currentInstructor, setCurrentInstructor] = useState();
     const [loading, setLoading] = useState(false);
+    const [refresh, setRefresh] = useState(false);
     let location = useLocation();
 
     useEffect(() => {
-        localStorage.setItem('user', JSON.stringify(user));
+        // if(user === null){
+        //     localStorage.removeItem('user')
+        // }
+        if(localStorage.getItem('user')){
+            setUser(JSON.parse(localStorage.getItem('user')))
+        }
     }, [user]);
 
     // useEffect(() => {
@@ -29,7 +35,7 @@ function App() {
 
     return (
         <Wrapper flexDirection='row' w='100vw' h='100vh' justifyContent='flex-start'>
-            <InstructorContext.Provider value={{instructor, loading, setInstructor, setLoading}}>
+            <InstructorContext.Provider value={{instructor, loading, refresh, setInstructor, setLoading, setRefresh}}>
                 <CurrentInstructorContext.Provider value={{currentInstructor, setCurrentInstructor}}>
                     <UserContext.Provider value={{user, setUser}}>
                     {location.pathname !== '/' &&
