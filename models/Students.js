@@ -13,6 +13,7 @@ const StudentsSchema = new Schema({
         time: {type: Date, required: true},
         instructorId: {type: String, require: true},
         timeId: {type: String, require: true},
+        topic: String,
         satisfied: Boolean
     }]
 })
