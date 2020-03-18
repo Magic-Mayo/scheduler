@@ -6,10 +6,15 @@ export default styled.p`
     grid-column: ${({gridColumn}) => gridColumn || ''};
     text-align: ${({textAlign}) => textAlign || 'left'};
     width: ${({w}) => w || ''};
+    height: ${({h}) => h || ''};
     background-color: ${({bgColor}) => bgColor || ''};
     color: ${({fontColor}) => fontColor || ''};
     margin: ${({margin}) => margin || ''};
     padding: ${({padding}) => padding || ''};
     white-space: ${({whiteSpace}) => whiteSpace || ''};
     opacity: ${({opacity}) => opacity || ''};
-`
+    position: ${({position}) => position || ''};
+    top: ${({top}) => top || ''};
+    ${({border}) => border || ''};
+    line-height: ${({lineHeight}) => lineHeight || ''};
+    `
