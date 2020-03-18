@@ -16,6 +16,7 @@ const Modal = props => {
         padding='10px'
         justifyContent='space-evenly'
         maxWidth='70vw'
+        zIndex='1000'
         >
             {props.children}
         </Wrapper>
