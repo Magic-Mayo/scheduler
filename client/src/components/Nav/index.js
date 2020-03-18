@@ -38,7 +38,7 @@ const NavBar = () => {
             bgColor='#172a55'
             fontColor='#fff'
             margin='15px 0'
-            padding='5px 10px 5px 70px'
+            padding='5px 10px 5px 53px'
             >
                 {user ? user.name : 'Please Login'}
             </P>
