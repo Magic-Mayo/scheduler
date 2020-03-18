@@ -4,13 +4,14 @@ import Student from './pages/Student';
 import Admin from './pages/Admin';
 import Home from './components/Home';
 import Nav from './components/Nav';
+import Schedule from './components/Schedule';
 import Calendar from './components/Calendar';
 import {Wrapper} from './components/styledComponents';
 import {UserContext, InstructorContext, CurrentInstructorContext} from './Context';
-import {faSync, faHome, faChalkboardTeacher, faArrowLeft, faArrowRight, faCalendarAlt} from '@fortawesome/free-solid-svg-icons';
+import {faSync, faHome, faChalkboardTeacher, faArrowLeft, faArrowRight, faCalendarAlt, faAngleDoubleLeft} from '@fortawesome/free-solid-svg-icons';
 import {library} from '@fortawesome/fontawesome-svg-core';
 
-library.add(faSync, faHome, faChalkboardTeacher, faArrowLeft, faArrowRight, faCalendarAlt);
+library.add(faSync, faHome, faChalkboardTeacher, faArrowLeft, faArrowRight, faCalendarAlt, faAngleDoubleLeft);
 
 function App() {
     const [user, setUser] = useState();
@@ -53,13 +54,22 @@ function App() {
                                 <Student />
                             </Route>
                         </Switch>
-                            <Route path='/student/calendar/:instructorId?/:date?'>
-                                {user ?
-                                    <Calendar />
+                            <Switch>
+                                <Route path='/student/calendar/:instructorId?/:date?'>
+                                    {user ?
+                                        <Calendar />
+                                        :
+                                        <Redirect to='/student' />
+                                    }
+                                </Route>
+                                <Route path='/student/myschedule'>
+                                    {user ?
+                                        <Schedule />
                                     :
-                                    <Redirect to='/student' />
-                                }
-                            </Route>
+                                        <Redirect to='/student' />
+                                    }
+                                </Route>
+                            </Switch>
                     </UserContext.Provider>
                 </CurrentInstructorContext.Provider>
             </InstructorContext.Provider>
