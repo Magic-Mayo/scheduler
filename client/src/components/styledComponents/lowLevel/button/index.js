@@ -12,7 +12,7 @@ export default styled.button`
     justify-content: ${props => props.justifyContent || ''};
     display: ${({disp}) => disp || ''};
     padding: ${({padding}) => padding || '8px'};
-    margin: ${({margin}) => margin || ''};
+    margin: ${({margin, first}) => first ? '0 0 0 150px' : margin || ''};
     text-align: ${({textAlign}) => textAlign || 'center'};
     border-bottom: ${({borderBottom}) => borderBottom || ''};
     border-top: ${({borderTop}) => borderTop || ''};
@@ -23,7 +23,10 @@ export default styled.button`
     border-color: ${({borderColor}) => borderColor || ''};
     max-width: ${({maxWidth}) => maxWidth || ''};
     align-items: ${({alignItems}) => alignItems || ''};
-    
+    left: ${({left}) => left || ''};
+    transform: ${({transform}) => transform || ''};
+    top: ${({top}) => top || ''};
+
     &.today {
         border-color: #000;
         border-style: dotted;
