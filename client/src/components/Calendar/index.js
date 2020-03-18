@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import {
     startOfMonth as startMonth,
     endOfMonth as endMonth,
@@ -15,6 +15,7 @@ import {useHistory, useLocation, Link} from 'react-router-dom';
 import {InstructorContext, UserContext, CurrentInstructorContext} from '../../Context';
 import axios from 'axios';
 import {HashLoader as Loading} from 'react-spinners';
+import {FontAwesomeIcon as FAIcon} from '@fortawesome/react-fontawesome';
 
 const days = [
     'Sun',
@@ -27,6 +28,7 @@ const days = [
 ]
 
 const Calendar = () => {
+    const inputRef = useRef(null);
     const {instructor, loading, refresh, setLoading, setRefresh} = useContext(InstructorContext);
     const {currentInstructor} = useContext(CurrentInstructorContext);
     const {user} = useContext(UserContext);
@@ -187,7 +189,6 @@ const Calendar = () => {
         }).then(data => {
             console.log(data.data)
             if(data.data.staff /* && data.data.student */){
-                setRefresh(!refresh);
                 setLoading(false);
                 return setTimeScheduled(true);
             }
@@ -218,11 +219,19 @@ const Calendar = () => {
                 w='100%'
                 fontS='25px'
                 fontW='bolder'
+                position='absolute'
+                top='20px'
                 >
                     {currentInstructor.name}'s available times for {dateFormat(new Date(dateClicked), 'MMMM dd, yyyy')}
                 </P>
             
-                <Wrapper w='100%'>
+                <Wrapper
+                w='100%'
+                flexDirection='unset'
+                flexWrap='wrap'
+                alignItems='flex-start'
+                margin='50px 0 0 0'
+                >
                     {sortedTimes.filter(avail => !avail.studentEmail)
                     .map(time => (
                         <Button
@@ -233,6 +242,7 @@ const Calendar = () => {
                             () => {scheduleTime(time)}
                         }
                         noCursor={selectedTime}
+                        margin='50px'
                         >
                             Schedule time for {dateFormat(new Date(time.time), 'hh:mm a')}
                         </Button>
@@ -255,12 +265,6 @@ const Calendar = () => {
     // },[topic]);
 
     // useEffect(() => {
-    //     fetch(`/availability/${dateFormat(selectedMonth, 'MMddyyyy')}/${currentInstructor.id}/`).then(dates => {
-    //         setAvailability(dates);
-    //     })
-    // }, [currentInstructor, selectedMonth]);
-
-    // useEffect(() => {
     //     setSelectedMonth(new Date());
     //     fetch(`/availability/${dateFormat(selectedMonth, 'MMyyyy')}/${currentInstructor.id}`).then(newMonth => {
     //         setAvailableDays(newMonth.data.days);
@@ -271,18 +275,8 @@ const Calendar = () => {
         axios.get(`/availability/${selectedMonth}/${currentInstructor.id}`).then(newMonth => {
             setAvailableDays(newMonth.data);
         });
-    }, [selectedMonth, refresh])
+    }, [currentInstructor, selectedMonth, refresh])
     
-    // useEffect(() => {
-    //     fetch({
-    //         url: `/schedule/${user.id}/${currentInstructor.id}`,
-    //         method: 'POST'
-    //     }).then(res => {
-    //         if(res.data) return setStatus('Your time has been reserved!');
-    //         setStatus('There was an error in reserving this time.  Try again and if the error persists please contact your Instructor/TA directly')
-    //     })
-    // }, [time]);
-
     useEffect(() => {
         if(!location.pathname.split('/')[4]){
             setDateClicked();
@@ -291,6 +285,12 @@ const Calendar = () => {
             setTimeToSchedule();
         }
     },[location.pathname]);
+
+    useEffect(() => {
+        if(selectedTime){
+            inputRef.current.focus();
+        }
+    }, [selectedTime])
 
     return (
         <>
@@ -311,6 +311,7 @@ const Calendar = () => {
                 </P>
                 {!timeScheduled &&
                     <Input
+                    ref={inputRef}
                     opacity={loading ? '.5' : ''}
                     onChange={handleInput}
                     value={topic[timeToSchedule._id]}
@@ -338,7 +339,12 @@ const Calendar = () => {
                             }
 
                             <Button
-                            onClick={() => {setTopic(); setSelectedTime()}}
+                            onClick={() => {
+                                setTopic();
+                                setSelectedTime();
+                                setTimeScheduled();
+                                setRefresh(!refresh)
+                            }}
                             bgColor='#ba0c2f'
                             >
                                 {timeScheduled ?
@@ -368,16 +374,10 @@ const Calendar = () => {
                     Welcome back, {user.name}!
                 </Wrapper>
 
-                {dateClicked &&
-                    <Button
-                    onClick={selectedTime ? null : () => {history.goBack(); setDateClicked()}}
-                    noCursor={selectedTime}
-                    >Back to Calendar</Button>
-                }
 
                 {!dateClicked &&
                     <P>
-                        {`${currentInstructor.name}'s calendar`}
+                        {`You are viewing ${currentInstructor.name}'s calendar`}
                     </P>
                 }
                 
@@ -392,29 +392,47 @@ const Calendar = () => {
                 flexDirection={dateClicked ? 'row' : ''}
                 boxShadow='#ccc 10px 10px 15px'
                 flexWrap={dateClicked ? 'wrap' : ''}
+                position='relative'
                 >
-                {location.pathname === `/student/calendar/${currentInstructor.id}` ?
-                    <>
-                        <Wrapper
-                        className='calendar-month'
-                        gridColumn='1/8'
-                        flexDirection='row'
-                        justifyContent='space-around'
-                        fontS='200%'
-                        position='relative'
+                    {location.pathname === `/student/calendar/${currentInstructor.id}` ?
+                        <>
+                            <Wrapper
+                            className='calendar-month'
+                            gridColumn='1/8'
+                            flexDirection='row'
+                            justifyContent='space-around'
+                            fontS='200%'
+                            position='relative'
+                            >
+                                <span onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}>&lt;</span>
+                                <span>{dateFormat(selectedMonth, 'LLLL yyyy')}</span>
+                                <span onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}>&gt;</span>
+                            </Wrapper>
+                            {getDays()}
+                            {populateCalendar()}
+                        </>
+                    : dateClicked &&
+                        <>
+                        <Button
+                        onClick={selectedTime ? null : () => {history.goBack(); setDateClicked()}}
+                        noCursor={selectedTime}
+                        position='absolute'
+                        left='-70px'
+                        fontS='50px'
+                        w='unset'
+                        h='unset'
+                        fontColor='#000'
+                        bgColor='inherit'
+                        top='50%'
+                        transform='translateY(-50%)'
                         >
-                            <span onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}>&lt;</span>
-                            <span>{dateFormat(selectedMonth, 'LLLL yyyy')}</span>
-                            <span onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}>&gt;</span>
-                        </Wrapper>
-                        {getDays()}
-                        {populateCalendar()}
-                    </>
-                : dateClicked &&
-                    <>
-                        {getTimes()}
-                    </>
-                }
+                            <FAIcon
+                            icon='angle-double-left'
+                            />
+                        </Button>
+                            {getTimes()}
+                        </>
+                    }
                 </Wrapper>
                 
                 {location.pathname === `/student/calendar/${currentInstructor.id}` &&
