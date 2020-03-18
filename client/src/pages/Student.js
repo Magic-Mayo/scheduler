@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import axios from 'axios';
 import {Button, Input, Label, Form, Wrapper, P} from '../components/styledComponents/';
 import { Link } from 'react-router-dom';
@@ -10,6 +10,7 @@ const Student = () => {
     const {user, setUser} = useContext(UserContext);
     const {instructor, setInstructor} = useContext(InstructorContext);
     const {setCurrentInstructor} = useContext(CurrentInstructorContext);
+    const inputRef = useRef(null);
 
     const findStudent = (e) => {
         e.preventDefault();
@@ -22,12 +23,19 @@ const Student = () => {
         })
     }
     
+    useEffect(() => {
+        if(!user){
+            inputRef.current.focus();
+        }
+    }, [user])
+
     return (
         <Wrapper w='100%' margin='0 0 0 50px'>
             {!user ?
                 <Form onSubmit={findStudent}>
                     <Label>BCS email address: </Label>
                     <Input
+                    ref={inputRef}
                     type='text'
                     name='email'
                     className='input student-input-email'
