@@ -30,6 +30,7 @@ export default styled.div`
     bottom: ${({bottom}) => bottom || ''};
     min-width: ${({minWidth}) => minWidth || ''};
     color: ${({fontColor}) => fontColor || ''};
+    z-index: ${({zIndex}) => zIndex || ''};
 
     &.calendar-month {
         span:first-of-type:hover, span:last-of-type:hover {
