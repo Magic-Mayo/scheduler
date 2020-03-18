@@ -79,7 +79,7 @@ const NavBar = () => {
                     key={ins.id}
                     >
                         <P
-                        margin='0 0 0 50px'
+                        margin='5px 0 10px 50px'
                         fontS='18px'
                         fontColor='#fff'
                         whiteSpace='nowrap'
@@ -134,10 +134,10 @@ const NavBar = () => {
             }
             {location.pathname.split('student/')[1] &&
                 <Wrapper
-                h='100%'
+                position='absolute'
+                bottom='145px'
                 w='100%'
                 disp='flex'
-                padding='0 0 130px 0'
                 flexDirection='row'
                 alignItems='flex-end'
                 fontColor='#fff'
