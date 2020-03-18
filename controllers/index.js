@@ -4,6 +4,7 @@ const Students = require('../models/Students');
 const axios = require('axios');
 const bcrypt = require('bcrypt');
 const {format} = require('date-fns');
+const {sendConfirmation, emailSent} = require('./email');
 
 module.exports = {
     addNewStudents: async (req, res) => {
@@ -48,7 +49,8 @@ module.exports = {
                 staff: [{
                     name: `${me.data.userAccount.firstName} ${me.data.userAccount.lastName}`,
                     id: me.data.userAccount.id
-                }]
+                }],
+                scheduledTimes: []
             });
         });
         
@@ -82,7 +84,7 @@ module.exports = {
         
         Staff.create({
             id: me.data.userAccount.id,
-            name: me.data.userAccount.name,
+            name: `${me.data.userAccount.firstName} ${me.data.userAccount.lastName}`,
             email: me.data.userAccount.email,
             pass: hashed,
             students: [],
@@ -95,7 +97,7 @@ module.exports = {
 
     findOne: (req, res) => {
         Students.findOne({email: req.params.email}).then(data => {
-            res.json({name: data.name, email: data.email, staff: data.staff});
+            res.json({name: data.name, email: data.email, staff: data.staff, scheduledTimes: data.scheduledTimes});
         }).catch(err => {
             console.error(err);
             return res.json(false);
@@ -129,6 +131,7 @@ module.exports = {
         const {topic, studentName, studentEmail, month, daysIdx, timesIdx, timeId, time} = req.body;
         const {studentId, instructorId} = req.params;
         const set = {$set: {}};
+
         set.$set[`schedule.$.days.${daysIdx}.times.${timesIdx}`] = {
             topic: topic,
             studentEmail: studentEmail,
@@ -139,19 +142,22 @@ module.exports = {
         Staff.findOneAndUpdate(
             {id: instructorId, 'schedule._id': month},
             set,
-            {new: true}
-            ).then(staff => {
+            {new: true}).then(staff => {
                 Students.findOneAndUpdate(
                     {id: studentId},
-                    {scheduledTimes: {
-                        $push: {
+                    {$push: {
+                        scheduledTimes: {
                             instructorId: instructorId,
                             timeId: timeId,
-                            time: time
+                            time: time,
+                            topic: topic
                         }
                     }},
                     {new:true}
-                ).then(student => res.json({student, staff}))
+                ).then(student => {
+                    sendConfirmation(studentName, studentEmail, staff.name, staff.email, time, topic);
+                    return res.json({email: emailSent, student, staff})
+                })
             }
         )
     },
