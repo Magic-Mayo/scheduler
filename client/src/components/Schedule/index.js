@@ -47,7 +47,8 @@ const Schedule = () => {
             <Wrapper
             w='100%'
             margin='0 0 0 50px'
-            justifyContent='space-evenly'
+            justifyContent='center'
+            alignItems='center'
             onClick={showTime ? () => setShowTime() : null}
             bgColor={showTime ? '#ccc' : ''}
             margin='0 0 0 50px'
@@ -62,21 +63,22 @@ const Schedule = () => {
                 </P>
                 {user.scheduledTimes?.length > 0 ?
                     <>
-                        {user.staff.map(staff => (
+                        {user.staff.map((staff, ind) => (
                             <Wrapper
+                            maxWidth='980px'
                             key={staff.id}
                             flexDirection='row'
                             w='90%'
                             padding='0 20px'
                             justifyContent='flex-start'
-                            h='100px'
                             position='relative'
                             borderBottom='#ccc 2px solid'
+                            margin='25px 0'
                             >
                                 <P
                                 position='absolute'
                                 h='100%'
-                                w='125px'
+                                w='150px'
                                 padding='20px 0'
                                 >
                                     {`Schedule with ${staff.name}`}
@@ -85,11 +87,11 @@ const Schedule = () => {
                                 flexDirection='row'
                                 justifyContent='flex-start'
                                 w='100%'
-                                margin='0 0 0 140px'
+                                margin='0 0 0 170px'
                                 overflowX='hidden'
                                 position='relative'
                                 >
-                                    {user.scheduledTimes.filter(ins => ins.instructorId === staff.id).map((times, ind) => (
+                                    {user.scheduledTimes.filter(ins => ins.instructorId === staff.id).map(times => (
                                         <Button
                                         onClick={() => getTimeToShow(times)}
                                         key={times.timeId}
@@ -98,7 +100,8 @@ const Schedule = () => {
                                         flexDirection='column'
                                         justifyContent='space-evenly'
                                         alignItems='center'
-                                        margin='10px'
+                                        margin='10px 15px'
+                                        bgColor={ind % 2 === 0 ? '' : '#ba0c2f'}
                                         >
                                             <span>{format(new Date(times.time), 'MMMM dd')}</span>
                                             <span>{format(new Date(times.time), 'hh:mm a')}</span>
