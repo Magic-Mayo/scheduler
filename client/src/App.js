@@ -65,11 +65,11 @@ function App() {
                             {/* <Home /> */}
                         </Route>
                         <Switch>
-                            <Route path='/admin'>
-                                <Admin />
-                            </Route>
                             <Route exact path='/student'>
                                 <Student />
+                            </Route>
+                            <Route path='/admin'>
+                                <Admin />
                             </Route>
                         </Switch>
                             <Switch>
