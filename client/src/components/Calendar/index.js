@@ -29,7 +29,7 @@ const days = [
 
 const Calendar = () => {
     const inputRef = useRef(null);
-    const {instructor, loading, refresh, setLoading, setRefresh} = useContext(InstructorContext);
+    const {instructors, loading, refresh, setLoading, setRefresh} = useContext(InstructorContext);
     const {currentInstructor} = useContext(CurrentInstructorContext);
     const {user} = useContext(UserContext);
     const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -361,7 +361,7 @@ const Calendar = () => {
             <Wrapper
             w='100%'
             h='100%'
-            margin='0 0 0 35px'
+            margin='0 0 0 50px'
             bgColor={selectedTime ? '#ccc' : ''}
             onClick={selectedTime && !loading ? () => setSelectedTime() : null}
             >
