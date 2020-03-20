@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Nav, Button, P, Wrapper} from '../styledComponents';
-import {InstructorContext, UserContext} from '../../Context';
+import {InstructorContext, UserContext, CurrentInstructorContext} from '../../Context';
 import {Link, useLocation} from 'react-router-dom';
 import {FontAwesomeIcon as FAIcon} from '@fortawesome/react-fontawesome';
 
@@ -8,6 +8,7 @@ const NavBar = () => {
     const [expanded, setExpanded] = useState(false);
     const [instructorExpand, setInstructorExpand] = useState(false);
     const {instructors, loading, refresh, setLoading, setRefresh} = useContext(InstructorContext);
+    const {setCurrentInstructor} = useContext(CurrentInstructorContext);
     const {user, setUser} = useContext(UserContext);
     const location = useLocation();
 
@@ -77,6 +78,7 @@ const NavBar = () => {
                     <Link
                     to={loading ? location.pathname : `/student/calendar/${ins.id}`}
                     key={ins.id}
+                    onClick={() => setCurrentInstructor(ins)}
                     >
                         <P
                         margin='5px 0 10px 50px'
