@@ -96,8 +96,8 @@ module.exports = {
     },
 
     findOne: (req, res) => {
-        Students.findOne({email: req.params.email}).then(data => {
-            res.json({name: data.name, email: data.email, staff: data.staff, scheduledTimes: data.scheduledTimes});
+        Students.findOne({email: req.params.email}).then(student => {
+            res.json(student);
         }).catch(err => {
             console.error(err);
             return res.json(false);
@@ -127,7 +127,7 @@ module.exports = {
         })
     },
 
-    scheduleTime: (req, res) => {
+    scheduleTime: async (req, res) => {
         const {topic, studentName, studentEmail, month, daysIdx, timesIdx, timeId, time} = req.body;
         const {studentId, instructorId} = req.params;
         const set = {$set: {}};
@@ -139,27 +139,25 @@ module.exports = {
             time: time
         };
         
-        Staff.findOneAndUpdate(
+        const staff = await Staff.findOneAndUpdate(
             {id: instructorId, 'schedule._id': month},
             set,
-            {new: true}).then(staff => {
-                Students.findOneAndUpdate(
-                    {id: studentId},
-                    {$push: {
-                        scheduledTimes: {
-                            instructorId: instructorId,
-                            timeId: timeId,
-                            time: time,
-                            topic: topic
-                        }
-                    }},
-                    {new:true}
-                ).then(student => {
-                    sendConfirmation(studentName, studentEmail, staff.name, staff.email, time, topic);
-                    return res.json({email: emailSent, student, staff})
-                })
-            }
-        )
+            {new: true})
+
+        const student = await Students.findOneAndUpdate(
+            {id: studentId},
+            {$push: {
+                scheduledTimes: {
+                    instructorId: instructorId,
+                    timeId: timeId,
+                    time: time,
+                    topic: topic
+                }
+            }},
+            {new:true})
+
+        sendConfirmation(studentName, studentEmail, staff.name, staff.email, time, topic);
+        return res.json({email: await emailSent, student: await student.scheduledTimes, staff: await staff.schedule})
     },
 
     updateAvailability: (req, res) => {
