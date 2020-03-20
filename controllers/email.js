@@ -16,7 +16,7 @@ module.exports = {
         const message = {
             from: 'Virtual Office Hours',
             replyTo: staffEmail,
-            to: 'mike.mayoii@gmail.com',
+            to: studentEmail,
             cc: staffEmail,
             subject: `Office Hours Scheduled!`,
             text: `${studentName}, you have been scheduled for virtual office hours with ${staffName} on ${format(new Date(time), 'MMMM d, yyyy hh:mm a')}.  You will be discussing "${topic}".  If you feel this has been scheduled in error please respond to this email and I will delete the time for you!`,
