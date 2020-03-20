@@ -17,6 +17,10 @@ if (process.env.NODE_ENV === "production") {
 
 require('./routes/index')(app);
 
+app.get("/student", (req, res) => {
+    res.sendFile(path.join(__dirname, "./client/public/index.html"));
+});
+
 app.get("/*", (req, res) => {
     res.sendFile(path.join(__dirname, "./client/public/index.html"));
 });
