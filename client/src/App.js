@@ -8,14 +8,32 @@ import Schedule from './components/Schedule';
 import Calendar from './components/Calendar';
 import {Wrapper} from './components/styledComponents';
 import {UserContext, InstructorContext, CurrentInstructorContext} from './Context';
-import {faSync, faHome, faChalkboardTeacher, faArrowLeft, faArrowRight, faCalendarAlt, faAngleDoubleLeft} from '@fortawesome/free-solid-svg-icons';
+import {
+    faSync,
+    faHome,
+    faChalkboardTeacher,
+    faArrowLeft,
+    faArrowRight,
+    faCalendarAlt,
+    faAngleDoubleLeft,
+    faAngleDoubleRight
+} from '@fortawesome/free-solid-svg-icons';
 import {library} from '@fortawesome/fontawesome-svg-core';
 
-library.add(faSync, faHome, faChalkboardTeacher, faArrowLeft, faArrowRight, faCalendarAlt, faAngleDoubleLeft);
+library.add(
+    faSync,
+    faHome,
+    faChalkboardTeacher,
+    faArrowLeft,
+    faArrowRight,
+    faCalendarAlt,
+    faAngleDoubleLeft,
+    faAngleDoubleRight
+);
 
 function App() {
     const [user, setUser] = useState();
-    const [instructor, setInstructor] = useState();
+    const [instructors, setInstructors] = useState();
     const [currentInstructor, setCurrentInstructor] = useState();
     const [loading, setLoading] = useState(false);
     const [refresh, setRefresh] = useState(false);
@@ -35,8 +53,8 @@ function App() {
     // }, [])
 
     return (
-        <Wrapper flexDirection='row' w='100vw' h='100vh' justifyContent='flex-start'>
-            <InstructorContext.Provider value={{instructor, loading, refresh, setInstructor, setLoading, setRefresh}}>
+        <Wrapper flexDirection='row' w='100vw' h='100vh' justifyContent='flex-start' overflowX='hidden'>
+            <InstructorContext.Provider value={{instructors, loading, refresh, setInstructors, setLoading, setRefresh}}>
                 <CurrentInstructorContext.Provider value={{currentInstructor, setCurrentInstructor}}>
                     <UserContext.Provider value={{user, setUser}}>
                     {location.pathname !== '/' &&
