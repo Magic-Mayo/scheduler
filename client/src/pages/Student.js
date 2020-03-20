@@ -19,7 +19,7 @@ const Student = () => {
         axios.get(`/student/find/${email}`).then(res => {
             if(!res.data) return setError('This email does not exist in Bootcamp Spot!  Please check the email address and try again.  If this error persists please contact your instructor or TA for further assistance.');
             setInstructor(res.data.staff);
-            setUser({name: res.data.name, email: res.data.email});
+            setUser(res.data);
         })
     }
     
