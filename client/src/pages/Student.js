@@ -8,7 +8,7 @@ const Student = () => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState();
     const {user, setUser} = useContext(UserContext);
-    const {instructor, setInstructor} = useContext(InstructorContext);
+    const {instructors, setInstructors} = useContext(InstructorContext);
     const {setCurrentInstructor} = useContext(CurrentInstructorContext);
     const inputRef = useRef(null);
 
@@ -18,7 +18,7 @@ const Student = () => {
 
         axios.get(`/student/find/${email}`).then(res => {
             if(!res.data) return setError('This email does not exist in Bootcamp Spot!  Please check the email address and try again.  If this error persists please contact your instructor or TA for further assistance.');
-            setInstructor(res.data.staff);
+            setInstructors(res.data.staff);
             setUser(res.data);
         })
     }
@@ -51,7 +51,7 @@ const Student = () => {
                     <P>
                         Please choose an instructor to view their calendar:
                     </P>
-                    {instructor.map(ins => (
+                    {instructors.map(ins => (
                         <Link
                         key={ins.id}
                         to={`/student/calendar/${ins.id}`}
