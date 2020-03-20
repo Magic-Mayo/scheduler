@@ -7,7 +7,7 @@ import {FontAwesomeIcon as FAIcon} from '@fortawesome/react-fontawesome';
 const NavBar = () => {
     const [expanded, setExpanded] = useState(false);
     const [instructorExpand, setInstructorExpand] = useState(false);
-    const {instructor, loading, refresh, setLoading, setRefresh} = useContext(InstructorContext);
+    const {instructors, loading, refresh, setLoading, setRefresh} = useContext(InstructorContext);
     const {user, setUser} = useContext(UserContext);
     const location = useLocation();
 
@@ -65,15 +65,15 @@ const NavBar = () => {
             bgColor='inherit'
             fontS='24px'
             onClick={() => {
-                setExpanded(instructor ? true : !expanded && false);
-                setInstructorExpand(instructor ? !instructorExpand : false)
+                setExpanded(instructors ? true : !expanded && false);
+                setInstructorExpand(instructors ? !instructorExpand : false)
             }}
             >
                 <FAIcon icon='chalkboard-teacher' />
                 <P fontS='24px' margin='0 0 0 20px'>Instructor</P>
             </Button>
             {instructorExpand &&
-                instructor.map(ins => (
+                instructors.map(ins => (
                     <Link
                     to={loading ? location.pathname : `/student/calendar/${ins.id}`}
                     key={ins.id}
