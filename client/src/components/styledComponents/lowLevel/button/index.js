@@ -26,6 +26,8 @@ export default styled.button`
     left: ${({left}) => left || ''};
     transform: ${({transform}) => transform || ''};
     top: ${({top}) => top || ''};
+    flex-direction: ${({flexDirection}) => flexDirection || ''};
+    right: ${({right}) => right || ''};
 
     &.today {
         border-color: #000;
