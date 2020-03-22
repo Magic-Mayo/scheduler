@@ -11,6 +11,7 @@ const NavBar = () => {
     const {setCurrentInstructor} = useContext(CurrentInstructorContext);
     const {user, setUser} = useContext(UserContext);
     const location = useLocation();
+    const path = location.pathname.split('/')[1] === 'student';
 
     useEffect(() => {
         setExpanded(false);
@@ -43,8 +44,9 @@ const NavBar = () => {
             >
                 {user ? user.name : 'Please Login'}
             </P>
+
             <Link
-            to={loading ? location.pathname : '/student'}
+            to={loading ? location.pathname : path ? '/student' : '/staff'}
             >
                 <Button
                 h='50px'
@@ -58,21 +60,23 @@ const NavBar = () => {
                 </Button>
             </Link>
 
-            <Button
-            disp='flex'
-            padding='5px'
-            w='100%'
-            textAlign='left'
-            bgColor='inherit'
-            fontS='24px'
-            onClick={() => {
-                setExpanded(instructors ? true : !expanded && false);
-                setInstructorExpand(instructors ? !instructorExpand : false)
-            }}
-            >
-                <FAIcon icon='chalkboard-teacher' />
-                <P fontS='24px' margin='0 0 0 20px'>Instructor</P>
-            </Button>
+            {path &&
+                <Button
+                disp='flex'
+                padding='5px'
+                w='100%'
+                textAlign='left'
+                bgColor='inherit'
+                fontS='24px'
+                onClick={() => {
+                    setExpanded(instructors ? true : !expanded && false);
+                    setInstructorExpand(instructors ? !instructorExpand : false)
+                }}
+                >
+                    <FAIcon icon='chalkboard-teacher' />
+                    <P fontS='24px' margin='0 0 0 20px'>Instructor</P>
+                </Button>
+            }
             {instructorExpand &&
                 instructors.map(ins => (
                     <Link
@@ -93,7 +97,7 @@ const NavBar = () => {
             }
             {user ?
                 <Link
-                to={loading ? location.pathname : '/student/myschedule'}
+                to={loading ? location.pathname : path ? '/student/myschedule' : '/staff/myschedule'}
                 >
                     <Button
                     bgColor='inherit'
