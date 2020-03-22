@@ -48,7 +48,11 @@ const Student = () => {
                 </Form>
             :
                 <Wrapper>
-                    <P>
+                    <P
+                    maxWidth='250px'
+                    textAlign='center'
+                    margin='0 0 20px'
+                    >
                         Please choose an instructor to view their calendar:
                     </P>
                     {instructors.map(ins => (
