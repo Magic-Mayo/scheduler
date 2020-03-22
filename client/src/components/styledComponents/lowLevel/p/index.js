@@ -17,4 +17,5 @@ export default styled.p`
     top: ${({top}) => top || ''};
     ${({border}) => border || ''};
     line-height: ${({lineHeight}) => lineHeight || ''};
+    max-width: ${({maxWidth}) => maxWidth || ''};
     `
