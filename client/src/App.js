@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {Switch, Route, useLocation, Redirect} from 'react-router-dom';
 import Student from './pages/Student';
-import Admin from './pages/Admin';
+import Staff from './pages/Staff';
 import Home from './components/Home';
 import Nav from './components/Nav';
 import Schedule from './components/Schedule';
@@ -68,12 +68,12 @@ function App() {
                             <Route exact path='/student'>
                                 <Student />
                             </Route>
-                            <Route path='/admin'>
-                                <Admin />
+                            <Route path='/staff'>
+                                <Staff />
                             </Route>
                         </Switch>
                             <Switch>
-                                <Route path='/student/calendar/:instructorId?/:date?'>
+                                <Route path='/(student|staff)?/calendar/:instructorId?/:date?'>
                                     {user ?
                                         <Calendar />
                                         :
