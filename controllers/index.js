@@ -19,7 +19,7 @@ module.exports = {
 
             authToken = login.data.authenticationInfo.authToken;
         }
-
+        
         let me = await axios({
             url: 'https://bootcampspot.com/api/instructor/v1/me',
             method: 'get',
@@ -37,9 +37,9 @@ module.exports = {
             headers: {'Content-type': "application/json", authToken: authToken},
             data: {sessionId: sessions.data.currentWeekSessions[0].session.id}
         })
-
+        
         const email = [];
-
+        
         students.data.students.map(val => {
             const student = val.student;
             email.push({
@@ -53,24 +53,35 @@ module.exports = {
                 scheduledTimes: []
             });
         });
-        
-        Students.create(email, {new: true}).then(data => {
-            res.json(data)
-        }).catch(err => console.error(err))
+
+        email.map(async student => {
+            const newStudent = await Students.findOne({id: student.id});
+
+            if(newStudent){
+                return Students.findByIdAndUpdate(student._id, {$push: {staff: student.staff[0]}});
+            }
+
+            Students.create(email);
+        })
+
+        const allStudents = await Students.find({'staff.id': me.data.userAccount.id})
+        return res.json(allStudents)
     },
 
     addNewStaff: async (req, res) => {
+        console.log(req.body)
         const staff = await Staff.findOne({email: req.body.email});
 
         let login = await axios({
             url: 'https://bootcampspot.com/api/instructor/v1/login',
             method: 'post',
-            data: {email: req.body.email, password: req.body.secret}
+            data: {email: req.body.email, password: req.body.password}
         });
 
         if(!login.data.success || staff){
             return res.json(false);
         }
+
         const authToken = login.data.authenticationInfo.authToken;
 
         let me = await axios({
@@ -80,22 +91,39 @@ module.exports = {
         });
 
         
-        const hashed = await bcrypt.hash(req.body.secret, 16);
+        const hashed = await bcrypt.hash(req.body.password, 16);
         
         Staff.create({
             id: me.data.userAccount.id,
             name: `${me.data.userAccount.firstName} ${me.data.userAccount.lastName}`,
             email: me.data.userAccount.email,
             pass: hashed,
+            bcsEmail: req.body.bcsEmail,
             students: [],
             schedule: []
-        }).then(staff =>
-            axios.post(`${req.protocol}://${req.get('host')}/staff/${staff.id}/getstudents`, {authToken: authToken})
-            .catch(err=>console.error(err)));
+        }).then(async staff => {
+            const students = await axios.post(`${req.protocol}://${req.get('host')}/staff/${staff.id}/getstudents`, {authToken: authToken});
+            res.json(students.data)
+        })
+        .catch(err=>console.error(err));
 
     },
 
-    findOne: (req, res) => {
+    findOne: async (req, res) => {
+        if(req.body.password){
+            const staff = await Staff.findOne({email: req.body.email});
+            let match;
+
+            if(staff){
+                match = await bcrypt.compare(req.body.password, staff.pass);
+            }
+
+            if(match){
+                return res.json(staff);
+            }
+            return res.json(false);
+        }
+
         Students.findOne({email: req.params.email}).then(student => {
             res.json(student);
         }).catch(err => {
