@@ -7,7 +7,7 @@ import { HashLoader } from 'react-spinners';
 import { Redirect } from 'react-router-dom';
 
 export const Admin = () => {
-    const {user, setUser} = useContext(UserContext);
+    const {user, userType, setUser, setUserType} = useContext(UserContext);
     const {loading, setLoading} = useContext(InstructorContext)
     const [input, setInput] = useState({email: '', password: '', confirmPassword: '', useEmail: false});
     const [error, setError] = useState();
@@ -30,8 +30,10 @@ export const Admin = () => {
             return setError('The email and password you entered do not match');
         }
         
+        setUserType('staff');
+        setUser(staff.data);
         setLoading(false);
-        return setRedirect(<Redirect to='/staff/calendar' />)
+        return setRedirect(true)
     }
     
     const createAccount = async e => {
@@ -43,141 +45,141 @@ export const Admin = () => {
         }
         e.preventDefault();
         const staff = await axios.post('/staff/add', newStaff);
-
+        
         if(!staff.data){
             setLoading(false);
             return setError('Please check that your email and password are correct.  If so, you may either already be in the system or this email does not exist in BCS.');
         }
-
+        
+        setUserType('staff');
         setUser(staff.data);
         setLoading(false);
-        return setRedirect(<Redirect to='/staff/calendar' />);
+        return setRedirect(true);
     }
 
     return (
         <>
-            {user ?
-                <Calendar admin />
-            : !loading ?
-                <Wrapper
-                justifyContent='center'
-                alignItems='center'
-                w='100%'
+            {redirect && <Redirect to='/staff/calendar' />}
+            <Wrapper
+            justifyContent='center'
+            alignItems='center'
+            w='100%'
+            margin='0 0 0 50px'
+            >
+                <P
+                position='fixed'
+                top='25px'
+                fontS='50px'
+                fontW='bold'
+                textAlign='center'
                 >
-                    <P
-                    position='fixed'
-                    top='50px'
-                    fontS='50px'
-                    fontW='bold'
+                    Instructional Staff Login
+                </P>
+
+                <Form alignItems='flex-start' onSubmit={signupForm ? createAccount : findInstructor}>
+                    <Label
+                    htmlFor='email'
                     >
-                        Instructional Staff Login
-                    </P>
-
-                    <Form alignItems='flex-start' onSubmit={signupForm ? createAccount : findInstructor}>
-                        <Label
-                        htmlFor='email'
-                        >
-                            Email Address:
-                        </Label>
-                        <Input
-                        margin='10px 10px 0'
-                        value={input.email}
-                        onChange={handleInput}
-                        name='email'
-                        type='email'
-                        placeholder='Enter email'
-                        />
-                        
-                        {signupForm && 
-                            <>
-                                <Label
-                                w='230px'
-                                position='relative'
-                                htmlFor='useEmail'
-                                margin='10px 10px 25px'
-                                >
-                                    Same as BCS email:
-                                    <Input
-                                    position='absolute'
-                                    margin='-3px 10px 10px'
-                                    value={input.useEmail}
-                                    onChange={handleInput}
-                                    name='useEmail'
-                                    type='checkbox'
-                                    />
-                                </Label>
-                            
-
-                                {!input.useEmail &&
-                                    <>
-                                    <Label
-                                    htmlFor='email'
-                                    >
-                                    Bootcamp Spot Email Address:
-                                    </Label>
-                                    <Input
-                                    margin='10px 10px 0'
-                                    value={input.bcsEmail}
-                                    onChange={handleInput}
-                                    name='bcsEmail'
-                                    type='email'
-                                    placeholder='Enter BCS email'
-                                    />
-                                    </>
-                                }
-                            </>
-                        }
-                        
-                        <Label>Password:</Label>
-                        <Input
-                        value={input.password}
-                        onChange={handleInput}
-                        name='password'
-                        type='password'
-                        placeholder='Enter password'
-                        />
-                        {signupForm &&
-                            <>
-                                <Label>Confirm Password:</Label>
+                        Email Address:
+                    </Label>
+                    <Input
+                    margin='10px 10px 0'
+                    value={input.email}
+                    onChange={handleInput}
+                    name='email'
+                    type='email'
+                    placeholder='Enter email'
+                    />
+                    
+                    {signupForm && 
+                        <>
+                            <Label
+                            w='230px'
+                            position='relative'
+                            htmlFor='useEmail'
+                            margin='10px 10px 25px'
+                            >
+                                Same as BCS email:
                                 <Input
-                                value={input.confirmPassword}
+                                position='absolute'
+                                margin='-3px 10px 10px'
+                                value={input.useEmail}
                                 onChange={handleInput}
-                                name='confirmPassword'
-                                type='password'
-                                placeholder='Confirm password'
+                                name='useEmail'
+                                type='checkbox'
                                 />
-                            </>
-                        }
+                            </Label>
+                        
 
+                            {!input.useEmail &&
+                                <>
+                                <Label
+                                htmlFor='email'
+                                >
+                                Bootcamp Spot Email Address:
+                                </Label>
+                                <Input
+                                margin='10px 10px 0'
+                                value={input.bcsEmail}
+                                onChange={handleInput}
+                                name='bcsEmail'
+                                type='email'
+                                placeholder='Enter BCS email'
+                                />
+                                </>
+                            }
+                        </>
+                    }
+                    
+                    <Label>Password:</Label>
+                    <Input
+                    value={input.password}
+                    onChange={handleInput}
+                    name='password'
+                    type='password'
+                    placeholder='Enter password'
+                    />
+                    {signupForm &&
+                        <>
+                            <Label>Confirm Password:</Label>
+                            <Input
+                            value={input.confirmPassword}
+                            onChange={handleInput}
+                            name='confirmPassword'
+                            type='password'
+                            placeholder='Confirm password'
+                            />
+                        </>
+                    }
+
+                    {!loading ?
                         <Wrapper
                         w='100%'
                         alignItems='center'
                         >
                             <Button margin='20px 0 0 0'>{signupForm ? 'Sign up' : 'Login'}</Button>
                         </Wrapper>
-                    </Form>
-                        
-                    {error && 
-                        <P
-                        w='300px'
-                        fontColor='red'
-                        >{error}</P>
+                    :
+                        <Wrapper
+                        w='100%'
+                        alignItems='center'
+                        justifyContent='center'
+                        >
+                            <HashLoader
+                            loading
+                            color='#172a55'
+                            />
+                        </Wrapper>
                     }
-                </Wrapper>
-            :
-                <Wrapper
-                w='100%'
-                alignItems='center'
-                justifyContent='center'
-                >
-                    <HashLoader
-                    loading
-                    color='#172a55'
-                    />
-                </Wrapper>
-
-            }
-            {redirect && redirect}
+                </Form>
+                    
+                {error && 
+                    <P
+                    w='300px'
+                    fontColor='red'
+                    >{error}</P>
+                }
+            </Wrapper>
         </>
     )
 }
