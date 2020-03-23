@@ -4,7 +4,7 @@ const Students = require('../models/Students');
 const axios = require('axios');
 const bcrypt = require('bcrypt');
 const {format} = require('date-fns');
-const {sendConfirmation, emailSent} = require('./email');
+const {sendConfirmation} = require('./email');
 
 module.exports = {
     addNewStudents: async (req, res) => {
@@ -69,7 +69,6 @@ module.exports = {
     },
 
     addNewStaff: async (req, res) => {
-        console.log(req.body)
         const staff = await Staff.findOne({email: req.body.email});
 
         let login = await axios({
@@ -113,12 +112,13 @@ module.exports = {
         if(req.body.password){
             const staff = await Staff.findOne({email: req.body.email});
             let match;
-
+            
             if(staff){
                 match = await bcrypt.compare(req.body.password, staff.pass);
             }
-
+            
             if(match){
+                staff.pass = undefined;
                 return res.json(staff);
             }
             return res.json(false);
@@ -185,7 +185,7 @@ module.exports = {
             {new:true})
 
         sendConfirmation(studentName, studentEmail, staff.name, staff.email, time, topic);
-        return res.json({email: await emailSent, student: await student.scheduledTimes, staff: await staff.schedule})
+        return res.json({student: await student.scheduledTimes, staff: await staff.schedule})
     },
 
     updateAvailability: (req, res) => {
