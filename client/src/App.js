@@ -37,6 +37,7 @@ function App() {
     const [currentInstructor, setCurrentInstructor] = useState();
     const [loading, setLoading] = useState(false);
     const [refresh, setRefresh] = useState(false);
+    const [userType, setUserType] = useState();
     let location = useLocation();
 
     // useEffect(() => {
@@ -56,7 +57,7 @@ function App() {
         <Wrapper flexDirection='row' w='100vw' h='100vh' justifyContent='flex-start' overflowX='hidden'>
             <InstructorContext.Provider value={{instructors, loading, refresh, setInstructors, setLoading, setRefresh}}>
                 <CurrentInstructorContext.Provider value={{currentInstructor, setCurrentInstructor}}>
-                    <UserContext.Provider value={{user, setUser}}>
+                    <UserContext.Provider value={{user, userType, setUser, setUserType}}>
                     {location.pathname !== '/' &&
                         <Nav />
                     }
@@ -68,16 +69,16 @@ function App() {
                             <Route exact path='/student'>
                                 <Student />
                             </Route>
-                            <Route path='/staff'>
+                            <Route exact path='/staff'>
                                 <Staff />
                             </Route>
                         </Switch>
                             <Switch>
-                                <Route path='/(student|staff)?/calendar/:instructorId?/:date?'>
+                                <Route path='/(student|staff)/calendar/:instructorId?/:date?'>
                                     {user ?
                                         <Calendar />
                                         :
-                                        <Redirect to='/student' />
+                                        <Redirect to={/*userType === 'staff' ?*/ '/staff'/* : '/student'*/} />
                                     }
                                 </Route>
                                 <Route path='/student/myschedule'>
