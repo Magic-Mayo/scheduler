@@ -38,6 +38,7 @@ function App() {
     const [loading, setLoading] = useState(false);
     const [refresh, setRefresh] = useState(false);
     let location = useLocation();
+    const [pageRefresh, ]
 
     // useEffect(() => {
     //     // if(user === null){
@@ -72,22 +73,23 @@ function App() {
                                 <Admin />
                             </Route>
                         </Switch>
-                            <Switch>
-                                <Route path='/student/calendar/:instructorId?/:date?'>
-                                    {user ?
-                                        <Calendar />
-                                        :
-                                        <Redirect to='/student' />
-                                    }
-                                </Route>
-                                <Route path='/student/myschedule'>
-                                    {user ?
-                                        <Schedule />
+                        <Switch>
+                            <Route path='/student/calendar/:instructorId?/:date?'>
+                                {user ?
+                                    <Calendar />
                                     :
-                                        <Redirect to='/student' />
-                                    }
-                                </Route>
-                            </Switch>
+                                    <Redirect to='/student' />
+                                }
+                            </Route>
+                            <Route path='/student/myschedule'>
+                                {user ?
+                                    <Schedule />
+                                :
+                                    <Redirect to='/student' />
+                                }
+                            </Route>
+                        </Switch>
+                        <Route to='/*'><Redirect to='/' /></Route>
                     </UserContext.Provider>
                 </CurrentInstructorContext.Provider>
             </InstructorContext.Provider>
