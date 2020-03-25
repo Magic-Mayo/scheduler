@@ -38,7 +38,6 @@ function App() {
     const [loading, setLoading] = useState(false);
     const [refresh, setRefresh] = useState(false);
     let location = useLocation();
-    const [pageRefresh, ]
 
     // useEffect(() => {
     //     // if(user === null){
