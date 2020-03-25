@@ -89,7 +89,7 @@ function App() {
                                 }
                             </Route>
                         </Switch>
-                        <Route to='/*'><Redirect to='/' /></Route>
+                        <Route path='/*'><Redirect to='/' /></Route>
                     </UserContext.Provider>
                 </CurrentInstructorContext.Provider>
             </InstructorContext.Provider>
