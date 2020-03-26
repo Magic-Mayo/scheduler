@@ -60,7 +60,6 @@ function App() {
                     {location.pathname !== '/' &&
                         <Nav />
                     }
-                    <Switch>
                         <Route exact path='/'>
                             <Redirect to='/student' />
                             {/* <Home /> */}
@@ -89,8 +88,6 @@ function App() {
                                 }
                             </Route>
                         </Switch>
-                        <Redirect to='/' />
-                    </Switch>
                     </UserContext.Provider>
                 </CurrentInstructorContext.Provider>
             </InstructorContext.Provider>
