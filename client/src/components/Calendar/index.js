@@ -273,6 +273,7 @@ const Calendar = () => {
     
     useEffect(() => {
         axios.get(`/availability/${selectedMonth}/${currentInstructor.id}`).then(newMonth => {
+            console.log(newMonth.data)
             setAvailableDays(newMonth.data);
         });
     }, [currentInstructor, selectedMonth, refresh])
