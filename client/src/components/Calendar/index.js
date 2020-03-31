@@ -29,14 +29,14 @@ const days = [
 
 const Calendar = () => {
     const inputRef = useRef(null);
-    const {instructors, loading, refresh, setLoading, setRefresh} = useContext(InstructorContext);
-    const {currentInstructor} = useContext(CurrentInstructorContext);
+    const {loading, refresh, setLoading, setRefresh} = useContext(InstructorContext);
+    const {availability, currentInstructor} = useContext(CurrentInstructorContext);
     const {user} = useContext(UserContext);
     const [selectedMonth, setSelectedMonth] = useState(new Date());
     const [dateClicked, setDateClicked] = useState();
-    const [availableDays, setAvailableDays] = useState([]);
     const [selectedTime, setSelectedTime] = useState();
     const [topic, setTopic] = useState({});
+    const [availableDays, setAvailableDays] = useState([]);
     const [timeToSchedule, setTimeToSchedule] = useState();
     const [timeScheduled, setTimeScheduled] = useState();
     const [error, setError] = useState();
@@ -63,22 +63,23 @@ const Calendar = () => {
     const populateCalendar = () => {
         const weeks = [];
         const days = [];
-
+        const currentToday = new Date();
+        
         const startOfMonth = startMonth(selectedMonth);
         const endOfMonth = endMonth(startOfMonth);
         const startOfWeek = startWeek(startOfMonth);
         const endofWeek = endWeek(endOfMonth);
-
+        
         let currentDay = startOfWeek;
         let numberedDate;
         const available = [];
         const date = availableDays?.days?.map(date => {
-                const filtered = date.times.filter(times => !times.studentEmail).length;
-                if(filtered){
-                    available.push(dateFormat(new Date(date.date), 'd'))
-                }
+            const filtered = date.times.filter(times => !times.studentEmail).length;
+            if(filtered){
+                available.push(dateFormat(new Date(date.date), 'd'))
+            }
         })
-
+        
         while(currentDay <= endofWeek){
             for(let i = 0; i < 7; i++){
                 const today = currentDay;
@@ -92,7 +93,10 @@ const Calendar = () => {
                         to={`/student/calendar/${currentInstructor.id}/${dateFormat(currentDay, 'MMddyyyy')}`}
                         >
                             <Button
-                            className={dateFormat(selectedMonth, 'MMddyyyy') === dateFormat(currentDay, 'MMddyyyy') ? 'today' : ''}
+                            className={
+                                dateFormat(selectedMonth, 'MM') === dateFormat(currentToday, 'MM') ?
+                                dateFormat(today, 'MMddyyyy') === dateFormat(currentToday, 'MMddyyyy') ? 'today' : ''
+                                : ''}
                             onClick={() => setDateClicked(today)}
                             bgColor='#fff'
                             calendar
@@ -187,7 +191,6 @@ const Calendar = () => {
             timeId: time._id,
             time: time.time
         }).then(data => {
-            console.log(data.data)
             if(data.data.staff /* && data.data.student */){
                 setLoading(false);
                 return setTimeScheduled(true);
@@ -272,10 +275,8 @@ const Calendar = () => {
     // },[currentInstructor])
     
     useEffect(() => {
-        axios.get(`/availability/${selectedMonth}/${currentInstructor.id}`).then(newMonth => {
-            console.log(newMonth.data)
-            setAvailableDays(newMonth.data);
-        });
+        const [schedule] = availability.filter(val => dateFormat(new Date(val.month), 'MMyyyy') === dateFormat(selectedMonth, 'MMyyyy'))
+        setAvailableDays(schedule);
     }, [currentInstructor, selectedMonth, refresh])
     
     useEffect(() => {
