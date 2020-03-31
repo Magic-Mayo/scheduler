@@ -134,21 +134,14 @@ module.exports = {
 
     getAvailability: (req,res) => {
         Staff.findOne({id: req.params.id}).then(data => {
-            if(data){
-                const [schedule] = data.schedule.filter(val => {
-                    return format(new Date(val.month), 'MMyyyy') === format(new Date(req.params.date), 'MMyyyy')})
-
-                return res.json(schedule);
-            }
-
-            res.json(null);
+            res.json(data.schedule);
         })
     },
 
     setAvailability: (req, res) => {
         const {id, date} = req.params;
 
-        Staff.findOneAndUpdate({id: id}, {schedule: req.body}, {new: true}).then(data => {
+        Staff.findOneAndUpdate({id: id}, {$push: {schedule: req.body}}, {new: true}).then(data => {
             res.json(data);
         }).catch(err => {
             res.json(err);

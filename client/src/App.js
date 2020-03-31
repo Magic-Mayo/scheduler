@@ -35,6 +35,7 @@ function App() {
     const [user, setUser] = useState();
     const [instructors, setInstructors] = useState();
     const [currentInstructor, setCurrentInstructor] = useState();
+    const [availability, setAvailability] = useState();
     const [loading, setLoading] = useState(false);
     const [refresh, setRefresh] = useState(false);
     const [userType, setUserType] = useState();
@@ -56,7 +57,7 @@ function App() {
     return (
         <Wrapper flexDirection='row' w='100vw' h='100vh' justifyContent='flex-start' overflowX='hidden'>
             <InstructorContext.Provider value={{instructors, loading, refresh, setInstructors, setLoading, setRefresh}}>
-                <CurrentInstructorContext.Provider value={{currentInstructor, setCurrentInstructor}}>
+                <CurrentInstructorContext.Provider value={{currentInstructor, availability, setCurrentInstructor, setAvailability}}>
                     <UserContext.Provider value={{user, userType, setUser, setUserType}}>
                     {location.pathname !== '/' &&
                         <Nav />
@@ -85,10 +86,17 @@ function App() {
                                     {user ?
                                         <Schedule />
                                     :
-                                        <Redirect to='/student' />
-                                    }
-                                </Route>
-                            </Switch>
+                                    <Redirect to='/student' />
+                                }
+                            </Route>
+                            <Route path='/student/myschedule'>
+                                {user ?
+                                    <Schedule />
+                                :
+                                    <Redirect to='/student' />
+                                }
+                            </Route>
+                        </Switch>
                     </UserContext.Provider>
                 </CurrentInstructorContext.Provider>
             </InstructorContext.Provider>
