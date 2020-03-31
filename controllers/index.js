@@ -106,16 +106,7 @@ module.exports = {
 
     getAvailability: (req,res) => {
         Staff.findOne({id: req.params.id}).then(data => {
-            if(data){
-                console.log(req.params.date)
-                console.log(data.schedule.filter(val => format(new Date(val.month), 'MMyyyy') === format(new Date(req.params.date), 'MMyyyy')))
-                const [schedule] = data.schedule.filter(val => {
-                    return format(new Date(val.month), 'MMyyyy') === format(new Date(req.params.date), 'MMyyyy')})
-                // console.log(schedule)
-                return res.json(schedule);
-            }
-
-            res.json(null);
+            res.json(data.schedule);
         })
     },
 
