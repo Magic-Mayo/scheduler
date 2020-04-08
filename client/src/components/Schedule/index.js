@@ -4,8 +4,8 @@ import {UserContext, InstructorContext} from '../../Context';
 import {format} from 'date-fns';
 import axios from 'axios';
 import Modal from '../Modal';
-import {FontAwesomeIcon as FAIcon} from '@fortawesome/react-fontawesome';
 import { useLocation } from 'react-router-dom';
+import { format as dateFormat } from 'date-fns'
 
 const Schedule = () => {
     const {user, setUser} = useContext(UserContext);
@@ -91,7 +91,7 @@ const Schedule = () => {
                                 overflowX='hidden'
                                 position='relative'
                                 >
-                                    {user.scheduledTimes.filter(ins => ins.instructorId === staff.id).map(times => (
+                                    {user.scheduledTimes.filter(ins => ins.instructorId === staff.id).sort((a,b) => parseInt(dateFormat(new Date(a.time), 'H')) - parseInt(dateFormat(new Date(b.time), 'H'))).map(times => (
                                         <Button
                                         onClick={() => getTimeToShow(times)}
                                         key={times.timeId}
