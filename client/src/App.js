@@ -1,8 +1,8 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {Switch, Route, useLocation, Redirect} from 'react-router-dom';
 import Student from './pages/Student';
 import Admin from './pages/Admin';
-import Home from './components/Home';
+// import Home from './components/Home';
 import Nav from './components/Nav';
 import Schedule from './components/Schedule';
 import Calendar from './components/Calendar';
