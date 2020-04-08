@@ -7,7 +7,7 @@ module.exports = (app) => {
     app.get('/student/find/:email', controller.findOne);
     app.get('/availability/:id', controller.getAvailability);
     app.put('/availability/:date/:id', controller.updateAvailability);
-    app.post('/availability/:date/:id', controller.setAvailability);
+    app.post('/availability/:id', controller.setAvailability);
     app.put('/schedule/:instructorId/:studentId', controller.scheduleTime);
     // app.get('/student/instructors', controller.)
 }
