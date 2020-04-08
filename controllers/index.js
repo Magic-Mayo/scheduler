@@ -58,7 +58,9 @@ module.exports = {
             const newStudent = await Students.findOne({id: student.id});
 
             if(newStudent){
-                return Students.findByIdAndUpdate(student._id, {$push: {staff: student.staff[0]}});
+                const toUpdate = newStudent.staff.filter(staff => staff.id === me.data.userAccount.id).length;
+
+                if(toUpdate === 0) return Students.findByIdAndUpdate(student._id, {$push: {staff: student.staff[0]}});
             }
 
             Students.create(email);
@@ -74,7 +76,7 @@ module.exports = {
         let login = await axios({
             url: 'https://bootcampspot.com/api/instructor/v1/login',
             method: 'post',
-            data: {email: req.body.email, password: req.body.password}
+            data: {email: req.body.email, password: req.body.bcsPassword}
         });
 
         if(!login.data.success || staff){
@@ -139,7 +141,7 @@ module.exports = {
     },
 
     setAvailability: (req, res) => {
-        const {id, date} = req.params;
+        const {id} = req.params;
 
         Staff.findOneAndUpdate({id: id}, {$push: {schedule: req.body}}, {new: true}).then(data => {
             res.json(data);
