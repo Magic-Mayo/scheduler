@@ -77,7 +77,7 @@ function App() {
                             <Switch>
                                 <Route path='/(student|staff)/calendar/:instructorId?/:date?'>
                                     {user ?
-                                        <Calendar />
+                                        <Calendar userType={userType}/>
                                         :
                                         <Redirect to={/*userType === 'staff' ?*/ '/staff'/* : '/student'*/} />
                                     }
