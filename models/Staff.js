@@ -8,11 +8,11 @@ const StaffSchema = new Schema({
     pass: {type: String, required: true},
     bcsEmail: {type: String, required: true, unique: true},
     schedule: [{
-        month: {type: Date, require: true},
+        month: {type: Number, require: true},
         days: [{
-            date: {type: Date, require: true},
+            date: {type: Number, require: true},
             times: [{
-                time: {type: Date, require: true},
+                time: {type: Number, require: true},
                 studentName: String,
                 studentEmail: String,
                 topic: String
