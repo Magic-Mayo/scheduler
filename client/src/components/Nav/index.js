@@ -46,7 +46,7 @@ const NavBar = () => {
             </P>
 
             <Link
-            to={loading ? location.pathname : path ? '/student' : '/staff'}
+            to={loading ? location.pathname : path ? '/student' : '/staff/calendar'}
             >
                 <Button
                 h='50px'
