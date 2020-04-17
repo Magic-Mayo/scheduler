@@ -1,22 +1,20 @@
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import {
     startOfMonth as startMonth,
-    endOfMonth as endMonth,
-    startOfWeek as startWeek,
-    endOfWeek as endWeek,
     format as dateFormat,
-    addDays,
     addMonths,
     subMonths,
-    addHours
+    fromUnixTime
 } from 'date-fns';
 import { Wrapper, Button, P, Input } from '../styledComponents';
 import Modal from '../Modal';
-import {useHistory, useLocation, Link} from 'react-router-dom';
+import {useHistory, useLocation} from 'react-router-dom';
 import {InstructorContext, UserContext, CurrentInstructorContext} from '../../Context';
 import axios from 'axios';
 import {HashLoader as Loading} from 'react-spinners';
 import {FontAwesomeIcon as FAIcon} from '@fortawesome/react-fontawesome';
+import TimesForDate from './TimesForDate';
+import PopulateCalendar from './PopulateCalendar';
 
 const days = [
     'Sun',
@@ -28,11 +26,11 @@ const days = [
     'Sat'
 ]
 
-const Calendar = ({userType}) => {
+const Calendar = () => {
     const inputRef = useRef(null);
     const {loading, refresh, setLoading, setRefresh} = useContext(InstructorContext);
     const {availability, currentInstructor} = useContext(CurrentInstructorContext);
-    const {user} = useContext(UserContext);
+    const {user, userType} = useContext(UserContext);
     const [selectedMonth, setSelectedMonth] = useState(Date.now());
     const [dateClicked, setDateClicked] = useState();
     const [selectedTime, setSelectedTime] = useState();
@@ -40,7 +38,7 @@ const Calendar = ({userType}) => {
     const [availableDays, setAvailableDays] = useState([]);
     const [timeToSchedule, setTimeToSchedule] = useState({[dateFormat(startMonth(new Date()), 't')]: []});
     const [timeScheduled, setTimeScheduled] = useState();
-    const [error, setError] = useState();
+    const [modal, setModal] = useState();
     const history = useHistory();
     let location = useLocation();
 
@@ -51,134 +49,16 @@ const Calendar = ({userType}) => {
         });
     };
 
-    const getDays = () => {
-        return (
-            days.map(day => (
-                <Wrapper key={day}>
-                    {day}
-                </Wrapper>
-            ))
-        )
-    }
-
-    const populateCalendar = () => {
-        const weeks = [];
-        const days = [];
-        const currentToday = new Date();
-        
-        const startOfMonth = startMonth(selectedMonth);
-        const endOfMonth = endMonth(startOfMonth);
-        const startOfWeek = startWeek(startOfMonth);
-        const endofWeek = endWeek(endOfMonth);
-        
-        let currentDay = startOfWeek;
-        let numberedDate;
-        const available = [];
-        const date = availableDays?.days?.map(date => {
-            const filtered = date.times.filter(times => !times.studentEmail).length;
-            if(filtered){
-                available.push(dateFormat(new Date(date.date), 'd'))
-            }
-        })
-        
-        while(currentDay <= endofWeek){
-            for(let i = 0; i < 7; i++){
-                const today = currentDay;
-                numberedDate = dateFormat(currentDay, 'd');
-                const time = available.includes(numberedDate);
-                days.push(
-                    !userType && !time ?
-                        <Wrapper w='100%' key={currentDay}>
-                            <Button
-                            className={dateFormat(selectedMonth, 'MMddyyyy') === dateFormat(currentDay, 'MMddyyyy') ? 'today' : ''}
-                            bgColor={dateFormat(currentDay, 'MM') !== dateFormat(startOfMonth, 'MM') ?
-                                '#fff' : '#ba0c2f'}
-                            calendar
-                            w='100%'
-                            fontColor={dateFormat(currentDay, 'MM') === dateFormat(startOfMonth, 'MM') ? '#000' : 'rgba(0,0,0,.2)'}
-                            borderRadius='0'
-                            borderLeft={i !== 0 ? '.25px solid #ccc' : ''}
-                            borderRight={i !== 6 ? '.25px solid #ccc' : ''}
-                            h='100%'
-                            disp='flex'
-                            justifyContent='flex-end'
-                            noCursor
-                            >
-                                <Wrapper>{numberedDate}</Wrapper>
-                            </Button>
-                        </Wrapper>
-                    :
-                        <Link
-                        className='link'
-                        key={currentDay}
-                        to={`/${!userType ? 'student' : 'staff'}/calendar/${userType ? user.id : currentInstructor.id}/${dateFormat(currentDay, 'MMddyyyy')}`}
-                        >
-                            <Button
-                            className={
-                                dateFormat(selectedMonth, 'MM') === dateFormat(currentToday, 'MM') ?
-                                dateFormat(today, 'MMddyyyy') === dateFormat(currentToday, 'MMddyyyy') ? 'today' : ''
-                                : ''}
-                            onClick={() => setDateClicked(today)}
-                            bgColor='#fff'
-                            calendar
-                            w='100%'
-                            padding='0 8px 0 0'
-                            fontColor={dateFormat(currentDay, 'MM') === dateFormat(startOfMonth, 'MM') ?
-                                '#000' : 'rgba(0,0,0,.2)'}
-                            borderRadius='0'
-                            borderLeft={i !== 0 ? '.25px solid #ccc' : ''}
-                            borderRight={i !== 6 ? '.25px solid #ccc' : ''}
-                            h='100%'
-                            disp='flex'
-                            justifyContent='flex-end'
-                            >
-                                <Wrapper
-                                justifyContent='unset'
-                                alignItems='unset'
-                                h='100%'
-                                >
-                                    {numberedDate}
-                                </Wrapper>
-                            </Button>
-                        </Link>
-                )
-
-                currentDay = addDays(currentDay, 1);
-            }
-
-            weeks.push(
-                days.map(day => (day))
-            );
-
-            days.length = 0;
-        }
-
-        return weeks.map((week, ind, arr) => (
-            <Wrapper
-            key={ind}
-            flexDirection='row'
-            h='100%'
-            gridColumn='1/8'
-            justifyContent='space-between'
-            borderBottom={ind !== arr.length - 1 ? '1px solid #ccc' : ''}
-            borderTop='1px solid #ccc'
-            >
-                {week}
-            </Wrapper>
-
-        ))
-        
-    }
-
-    const submitSchedule = time => {
+    const requestScheduledTime = time => {
         setLoading(true);
+        const date = parseInt(dateClicked) * 1000;
         time.topic = topic[time._id];
         time.studentName = user.name;
         time.email = user.email;
         let daysIdx, timesIdx;
 
         availableDays.days.map((day, ind) => {
-            if(dateFormat(new Date(day.date), 'MMdd') === dateFormat(new Date(dateClicked), 'MMdd')){
+            if(dateFormat(new Date(day.date), 'MMdd') === dateFormat(new Date(date), 'MMdd')){
                 daysIdx = ind;
                 return day.times.map((times, ind) => {
                     if(dateFormat(new Date(times.time), 'HHmm') === dateFormat(new Date(time.time), 'HHmm')){
@@ -204,142 +84,54 @@ const Calendar = ({userType}) => {
                 return setTimeScheduled(true);
             }
 
-            setError('There was a problem scheduling the time.  Please check that the time is still available and try again.')
+            setModal('There was a problem scheduling the time.  Please check that the time is still available and try again.')
             setRefresh(!refresh)
+        })
+    }
+
+    const addTimeToSchedule = time => {
+        setModal(() => {
+            if(availableDays.includes(time)) return availableDays[time].topic;
+        });
+
+        setTimeToSchedule(prevState => {
+            if(timeToSchedule[dateFormat(startMonth(fromUnixTime(time)), 't')].includes(time)){
+                const newTime = {...prevState}
+                const reference = newTime[dateFormat(startMonth(fromUnixTime(time)), 't')];
+                const index = reference.indexOf(time);
+                if(index !== -1){
+                    reference.splice(index, 1);
+                }
+                return newTime;
+            }
+            
+            return {...prevState, [dateFormat(startMonth(fromUnixTime(time)), 't')]: [...prevState[dateFormat(startMonth(fromUnixTime(time)), 't')], time]}
         })
     }
         
     const scheduleTime = time => {
-        if(!userType){
-            setTopic(prevState => ({...prevState, [time._id]: ''}))
-            setTimeToSchedule(time);
-            setSelectedTime(true);
-        }
+        console.log(time)
+        setTopic(prevState => ({...prevState, [time._id]: ''}));
+        setTimeToSchedule(() => !userType && time);
+        setSelectedTime(true);
     }
-
-    const getTimes = () => {
-        let today;
-        let sortedTimes;
-
-        if(!userType){
-            [today] = availableDays.days.filter(days =>
-                dateFormat(new Date(days.date), 'dd') === dateFormat(dateClicked, 'dd')
-            )
-            sortedTimes = today.times.sort((a,b) => 
-                parseInt(dateFormat(new Date(a.time), 'H')) - parseInt(dateFormat(new Date(b.time), 'H'))
-            );
-        } else {
-            sortedTimes = [
-                addHours(dateClicked, 9),
-                addHours(dateClicked, 10),
-                addHours(dateClicked, 11),
-                addHours(dateClicked, 12),
-                addHours(dateClicked, 13),
-                addHours(dateClicked, 14),
-                addHours(dateClicked, 15),
-                addHours(dateClicked, 16),
-                addHours(dateClicked, 17),
-                addHours(dateClicked, 18),
-                addHours(dateClicked, 19),
-                addHours(dateClicked, 20),
-                addHours(dateClicked, 21)
-            ]
-        }
-
-        return (
-            <>
-                <P
-                textAlign='center'
-                w='100%'
-                fontS='25px'
-                fontW='bolder'
-                position='absolute'
-                top='20px'
-                >
-                    {!userType && `${currentInstructor.name}'s available times for ${dateFormat(new Date(dateClicked), 'MMMM dd, yyyy')}`}
-                </P>
-            
-                <Wrapper
-                w='100%'
-                flexDirection='unset'
-                flexWrap='wrap'
-                alignItems='flex-start'
-                margin='50px 0 0 0'
-                >
-                    {!userType ?
-                        sortedTimes.filter(avail => !avail.studentEmail)
-                        .map(time => (
-                            <Button
-                            key={time._id}
-                            h='75px'
-                            fontS='14px'
-                            onClick={selectedTime ? null :
-                                () => {scheduleTime(time)}
-                            }
-                            noCursor={selectedTime}
-                            margin='25px'
-                            >
-                                Schedule time for {dateFormat(new Date(time.time), 'hh:mm a')}
-                            </Button>
-                        ))
-                        :
-                        sortedTimes.map(time => (
-                            <Button
-                            key={time}
-                            bgColor={timeToSchedule[dateFormat(startMonth(time), 't')].includes(time.toString()) ? '' : '#ba0c2f'}
-                            h='75px'
-                            fontS='14px'
-                            onClick={timeToSchedule[dateFormat(startMonth(time), 't')].includes(time.toString()) ?
-                                () => setTimeToSchedule(prevState => {
-                                    const index = prevState.indexOf(time.toString());
-                                    if(index !== -1){
-                                        prevState.splice(index, 1);
-                                    }
-                                    return prevState;
-                                })
-                                :
-                                () => setTimeToSchedule(prevState => {
-                                    const beginMonth = dateFormat(startMonth(time), 't')
-                                    return {...prevState, [prevState[beginMonth]]: [...prevState[beginMonth], time.toString()]}
-                                })
-                            }
-                            margin='10px'
-                            >
-                            {console.log(timeToSchedule)}
-                                Make {dateFormat(new Date(time), 'hh:mm a')} available
-                            </Button>
-                        ))
-                    }
-                </Wrapper>                
-            </>
-        )
-    }
-
-    // useEffect(() => {
-    //     if(selectedTime){
-    //         scheduleTime(timeToSchedule);
-    //     } 
-    //     else {
-    //         return () => {
-    //             setTopic();
-    //             setSelectedTime();
-    //         }
-    //     }
-    // },[topic]);
-
-    // useEffect(() => {
-    //     setSelectedMonth(new Date());
-    //     fetch(`/availability/${dateFormat(selectedMonth, 'MMyyyy')}/${currentInstructor.id}`).then(newMonth => {
-    //         setAvailableDays(newMonth.data.days);
-    //     });
-    // },[currentInstructor])
     
     useEffect(() => {
-        if(!userType){
-            const [schedule] = availability.filter(val => dateFormat(new Date(val.month), 'MMyyyy') === dateFormat(selectedMonth, 'MMyyyy'))
-            setAvailableDays(schedule);
-        }
-    }, [currentInstructor, selectedMonth, refresh])
+        const [schedule] = availability.filter(val => val.month === parseInt(dateFormat(startMonth(selectedMonth), 't')))
+        setAvailableDays(schedule);
+    }, [currentInstructor, selectedMonth, refresh]);
+
+    useEffect(() => {
+        setTimeToSchedule(prevSched => {
+            if(userType === 'staff' && !prevSched[dateFormat(startMonth(fromUnixTime(selectedMonth)), 't')]){
+                const newSched = {...prevSched};
+                newSched[dateFormat(startMonth(new Date(selectedMonth)), 't')] = [];
+                return newSched;
+            }
+
+            return prevSched;
+        });
+    }, [selectedMonth])
     
     useEffect(() => {
         if(!userType && !location.pathname.split('/')[4]){
@@ -354,80 +146,89 @@ const Calendar = ({userType}) => {
         if(selectedTime){
             inputRef.current.focus();
         }
-    }, [selectedTime])
+    }, [selectedTime]);
 
     return (
         <>
-            {selectedTime && 
-            <Modal >
-                <P
-                opacity={loading ? '.5' : ''}
-                textAlign='center'
-                >
-                    {timeScheduled ?
-                        `Your time has been reserved for ${dateFormat(new Date(timeToSchedule.time), 'hh:mm a')} on${' '}
-                        ${dateFormat(new Date(timeToSchedule.time), 'MMMM dd, yyyy')}!`
-                    :
-                        `What would you like to cover on${" "}
-                        ${dateFormat(new Date(timeToSchedule.time), 'MMMM dd, yyyy')}${" "}
-                        at ${dateFormat(new Date(timeToSchedule.time), 'hh:mm a')}?`
-                    }
-                </P>
-                {!timeScheduled &&
-                    <Input
-                    ref={inputRef}
-                    opacity={loading ? '.5' : ''}
-                    onChange={handleInput}
-                    value={topic[timeToSchedule._id]}
-                    type='text'
-                    name={timeToSchedule._id}
-                    placeholder='Topic to cover'
-                    />
-                }
-                <Wrapper flexDirection='row'>
-                    {loading ?
-                        <Loading
-                        loading
-                        color='#172a55'
-                        />
-                    :
-                        <>
-                            {!timeScheduled &&
-                                <Button
-                                margin='0 15px 0 0'
-                                onClick={() => submitSchedule(timeToSchedule)}
-                                bgColor='#172a55'
-                                >
-                                    Schedule Time!
-                                </Button>
-                            }
-
-                            <Button
-                            onClick={() => {
-                                setTopic();
-                                setSelectedTime();
-                                setTimeScheduled();
-                                setRefresh(!refresh)
-                            }}
-                            bgColor='#ba0c2f'
-                            >
-                                {timeScheduled ?
-                                    'Okay!'
-                                :
-                                    'Cancel'
-                                }
-                            </Button>
-                        </>
-                    }
-                </Wrapper>
-            </Modal>
+            {modal &&
+                <Modal>
+                    {modal}
+                    <Button onClick={() => setModal()}>Continue</Button>
+                </Modal>
             }
+
+            {selectedTime &&
+                <Modal >
+                    {console.log(timeToSchedule)}
+                    <P
+                    opacity={loading ? '.5' : ''}
+                    textAlign='center'
+                    >
+                        {timeScheduled ?
+                            `Your time has been reserved for ${dateFormat(new Date(timeToSchedule.time), 'hh:mm a')} on${' '}
+                            ${dateFormat(new Date(timeToSchedule.time), 'MMMM dd, yyyy')}!`
+                        :
+                            `What would you like to cover on${" "}
+                            ${dateFormat(new Date(timeToSchedule.time), 'MMMM dd, yyyy')}${" "}
+                            at ${dateFormat(new Date(timeToSchedule.time), 'hh:mm a')}?`
+                        }
+                    </P>
+                    {!timeScheduled &&
+                        <Input
+                        ref={inputRef}
+                        opacity={loading ? '.5' : ''}
+                        onChange={handleInput}
+                        value={topic[timeToSchedule._id]}
+                        type='text'
+                        name={timeToSchedule._id}
+                        placeholder='Topic to cover'
+                        />
+                    }
+                    <Wrapper flexDirection='row'>
+                        {loading ?
+                            <Loading
+                            loading
+                            color='#172a55'
+                            />
+                        :
+                            <>
+                                {!timeScheduled &&
+                                    <Button
+                                    margin='0 15px 0 0'
+                                    onClick={() => requestScheduledTime(timeToSchedule)}
+                                    bgColor='#172a55'
+                                    >
+                                        Schedule Time!
+                                    </Button>
+                                }
+
+                                <Button
+                                onClick={() => {
+                                    setTopic();
+                                    setSelectedTime();
+                                    setTimeScheduled();
+                                    setRefresh(!refresh)
+                                }}
+                                bgColor='#ba0c2f'
+                                >
+                                    {timeScheduled ?
+                                        'Okay!'
+                                    :
+                                        'Cancel'
+                                    }
+                                </Button>
+                            </>
+                        }
+                    </Wrapper>
+                </Modal>
+            }
+
             <Wrapper
             w='100%'
             h='100%'
             margin='0 0 0 50px'
-            bgColor={selectedTime ? '#ccc' : ''}
-            onClick={selectedTime && !loading ? () => setSelectedTime() : null}
+            bgColor={selectedTime || modal ? '#ccc' : ''}
+            onClick={modal || selectedTime && !loading ? () => {setModal(); setSelectedTime()} : null}
             >
                 <Wrapper
                 top='5%'
@@ -473,29 +274,53 @@ const Calendar = ({userType}) => {
                                 <span>{dateFormat(selectedMonth, 'LLLL yyyy')}</span>
                                 <span onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}>&gt;</span>
                             </Wrapper>
-                            {getDays()}
-                            {populateCalendar()}
+
+                            {days.map(day => (
+                                <Wrapper key={day}>
+                                    {day}
+                                </Wrapper>
+                            ))}
+
+                            <PopulateCalendar
+                            selectedMonth={selectedMonth}
+                            availableDays={availableDays}
+                            userType={userType}
+                            currentInstructor={currentInstructor}
+                            setDateClicked={setDateClicked}
+                            user={user}
+                            error={modal}
+                            />
                         </>
                     : dateClicked &&
                         <>
-                        <Button
-                        onClick={selectedTime ? null : () => {history.goBack(); setDateClicked()}}
-                        noCursor={selectedTime}
-                        position='absolute'
-                        left='-70px'
-                        fontS='50px'
-                        w='unset'
-                        h='unset'
-                        fontColor='#000'
-                        bgColor='inherit'
-                        top='50%'
-                        transform='translateY(-50%)'
-                        >
-                            <FAIcon
-                            icon='angle-double-left'
+                            <Button
+                            onClick={selectedTime ? null : () => {history.goBack(); setDateClicked()}}
+                            noCursor={selectedTime}
+                            position='absolute'
+                            left='-70px'
+                            fontS='50px'
+                            w='unset'
+                            h='unset'
+                            fontColor='#000'
+                            bgColor='inherit'
+                            top='50%'
+                            transform='translateY(-50%)'
+                            >
+                                <FAIcon
+                                icon='angle-double-left'
+                                />
+                            </Button>
+                            
+                            <TimesForDate
+                            dateClicked={dateClicked}
+                            timeToSchedule={timeToSchedule}
+                            selectedTime={selectedTime}
+                            scheduleTime={scheduleTime}
+                            addTimeToSchedule={addTimeToSchedule}
+                            userType={userType}
+                            availableDays={availableDays}
+                            currentInstructor={currentInstructor}
                             />
-                        </Button>
-                            {getTimes()}
                         </>
                     }
                 </Wrapper>
