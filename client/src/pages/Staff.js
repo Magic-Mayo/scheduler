@@ -1,14 +1,15 @@
 import React, { useContext, useState } from 'react';
 import Calendar from '../components/Calendar';
 import { Form, Input, Wrapper, Label, P, Button } from '../components/styledComponents';
-import { UserContext, InstructorContext } from '../Context';
+import { CurrentInstructorContext, UserContext, InstructorContext } from '../Context';
 import axios from 'axios';
 import { HashLoader } from 'react-spinners';
 import { Redirect } from 'react-router-dom';
 
 export const Admin = () => {
-    const {user, userType, setUser, setUserType} = useContext(UserContext);
-    const {loading, setLoading} = useContext(InstructorContext)
+    const {setUser, setUserType} = useContext(UserContext);
+    const {loading, setLoading} = useContext(InstructorContext);
+    const {setAvailability} = useContext(CurrentInstructorContext);
     const [input, setInput] = useState({email: '', password: '', confirmPassword: '', useEmail: false});
     const [error, setError] = useState();
     const [signupForm, setSignupForm] = useState(false);
@@ -32,6 +33,7 @@ export const Admin = () => {
         
         setUserType('staff');
         setUser(staff.data);
+        setAvailability(staff.data.schedule);
         setLoading(false);
         return setRedirect(true)
     }
