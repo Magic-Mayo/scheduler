@@ -73,22 +73,15 @@ function App() {
                                 <Staff />
                             </Route>
                         </Switch>
-                            <Switch>
-                                <Route path='/(student|staff)/calendar/:instructorId?/:date?'>
-                                    {user ?
-                                        <Calendar />
-                                        :
-                                        <Redirect to={location.pathname.split('/')[1] === 'staff' ? '/staff' : '/student'} />
-                                    }
-                                </Route>
-                                <Route path='/student/myschedule'>
-                                    {user ?
-                                        <Schedule />
-                                    :
-                                    <Redirect to='/student' />
+                        <Switch>
+                            <Route path='/(student|staff)/calendar/:instructorId?/:date?'>
+                                {user ?
+                                    <Calendar />
+                                :
+                                    <Redirect to={location.pathname.split('/')[1] === 'staff' ? '/staff' : '/student'} />
                                 }
                             </Route>
-                            <Route path='/student/myschedule'>
+                            <Route path='/(student|staff)/myschedule'>
                                 {user ?
                                     <Schedule />
                                 :
