@@ -4,9 +4,7 @@ import {UserContext, InstructorContext} from '../../Context';
 import {format} from 'date-fns';
 import axios from 'axios';
 import Modal from '../Modal';
-// import {FontAwesomeIcon as FAIcon} from '@fortawesome/react-fontawesome';
 import { useLocation } from 'react-router-dom';
-import { format as dateFormat } from 'date-fns';
 
 const Schedule = () => {
     const {user, setUser} = useContext(UserContext);
@@ -94,7 +92,7 @@ const Schedule = () => {
                                 >
                                     {user.scheduledTimes
                                     .filter(ins => ins.instructorId === staff.id)
-                                    .sort((a,b) => parseInt(dateFormat(new Date(a.time), 'H')) - parseInt(dateFormat(new Date(b.time), 'H')))
+                                    .sort((a,b) => a.time - b.time)
                                     .map(times => (
                                         <Button
                                         onClick={() => getTimeToShow(times)}
@@ -107,8 +105,8 @@ const Schedule = () => {
                                         margin='10px 15px'
                                         bgColor={ind % 2 === 0 ? '' : '#ba0c2f'}
                                         >
-                                            <span>{format(new Date(times.time), 'MMMM dd')}</span>
-                                            <span>{format(new Date(times.time), 'hh:mm a')}</span>
+                                            <span>{format(new Date(times.time * 1000), 'MMMM dd')}</span>
+                                            <span>{format(new Date(times.time * 1000), 'hh:mm a')}</span>
                                         </Button>
                                     ))}
                                     {/* <Button
