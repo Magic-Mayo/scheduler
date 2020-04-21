@@ -142,8 +142,9 @@ module.exports = {
 
     setAvailability: (req, res) => {
         const {id} = req.params;
+        console.log(req.body.days)
 
-        Staff.findOneAndUpdate({id: id}, {$push: {schedule: req.body}}, {new: true}).then(data => {
+        Staff.findOneAndUpdate({id: id, 'schedule.month': parseInt(req.body.month)}, {$push: {'schedule.$.days': req.body.days}}, {new: true}).then(data => {
             res.json(data);
         }).catch(err => {
             res.json(err);
