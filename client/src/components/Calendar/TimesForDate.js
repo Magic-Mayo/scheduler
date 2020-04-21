@@ -10,16 +10,13 @@ from 'date-fns';
 const TimesForDate = ({dateClicked, timeToSchedule, selectedTime, scheduleTime, addTimeToSchedule, userType, availableDays, currentInstructor}) => {
     let today;
     let sortedTimes;
-    const date = parseInt(dateClicked) * 1000;
 
     if(!userType){
         [today] = availableDays.days.filter(days =>
-            dateFormat(new Date(days.date), 'dd') === dateFormat(new Date(date), 'dd')
+            dateFormat(fromUnixTime(days.date), 'dd') === dateFormat(fromUnixTime(dateClicked), 'dd')
         )
 
-        sortedTimes = today.times.sort((a,b) => 
-            parseInt(dateFormat(new Date(a.time), 'H')) - parseInt(dateFormat(new Date(b.time), 'H'))
-        );
+        sortedTimes = today.times.sort((a,b) => a.time - b.time);
     } else {
         sortedTimes = [
             (parseInt(dateClicked) + 3600 * 9).toString(),
@@ -49,7 +46,7 @@ const TimesForDate = ({dateClicked, timeToSchedule, selectedTime, scheduleTime, 
             position='absolute'
             top='20px'
             >
-                {!userType && `${currentInstructor.name}'s available times for ${dateFormat(new Date(date), 'MMMM dd, yyyy')}`}
+                {!userType && `${currentInstructor.name}'s available times for ${dateFormat(fromUnixTime(dateClicked), 'MMMM dd, yyyy')}`}
             </P>
         
             <Wrapper
@@ -72,7 +69,7 @@ const TimesForDate = ({dateClicked, timeToSchedule, selectedTime, scheduleTime, 
                         noCursor={selectedTime}
                         margin='25px'
                         >
-                            Schedule time for {dateFormat(new Date(time.time), 'hh:mm a')}
+                            Schedule time for {dateFormat(fromUnixTime(time.time), 'hh:mm a')}
                         </Button>
                     ))
                     :

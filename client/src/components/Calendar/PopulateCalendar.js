@@ -5,6 +5,7 @@ import {
     startOfWeek as startWeek,
     endOfWeek as endWeek,
     format as dateFormat,
+    fromUnixTime,
     addDays
 } from 'date-fns';
 import { Wrapper, Button } from '../styledComponents';
@@ -27,7 +28,7 @@ const PopulateCalendar = ({ setDateClicked, selectedMonth, availableDays, userTy
     const date = availableDays?.days?.map(date => {
         const filtered = date.times.filter(times => !times.studentEmail).length;
         if(filtered){
-            available.push(dateFormat(new Date(date.date), 'd'))
+            available.push(dateFormat(fromUnixTime(date.date), 'd'))
         }
     })
     
