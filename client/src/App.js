@@ -78,7 +78,7 @@ function App() {
                                     {user ?
                                         <Calendar />
                                         :
-                                        <Redirect to={userType === 'staff' ? '/staff' : '/student'} />
+                                        <Redirect to={location.pathname.split('/')[1] === 'staff' ? '/staff' : '/student'} />
                                     }
                                 </Route>
                                 <Route path='/student/myschedule'>
