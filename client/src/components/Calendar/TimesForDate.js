@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Wrapper, P, Button } from '../styledComponents';
 import {
     format as dateFormat,

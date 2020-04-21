@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
     startOfMonth as startMonth,
     endOfMonth as endMonth,
