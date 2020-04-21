@@ -19,7 +19,7 @@ const Schedule = () => {
     }
 
     useEffect(() => {
-        axios.get(`/student/find/${user.email}`).then(student => {
+        axios.get(`/api/student/find/${user.email}`).then(student => {
             setUser(student.data);
         })
     }, [refresh])

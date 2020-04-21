@@ -24,7 +24,7 @@ export const Admin = () => {
     const findInstructor = async e => {
         setLoading(true);
         e.preventDefault();
-        const staff = await axios.post(`/staff/find/`, input);
+        const staff = await axios.post(`/api/staff/find/`, input);
         
         if(!staff.data){
             setLoading(false);
@@ -39,14 +39,14 @@ export const Admin = () => {
     }
     
     const createAccount = async e => {
+        e.preventDefault();
         setLoading(true);
         const newStaff = {
             email: input.email,
             password: input.password,
             bcsEmail: input.useEmail ? input.email : input.bcsEmail
         }
-        e.preventDefault();
-        const staff = await axios.post('/staff/add', newStaff);
+        const staff = await axios.post('/api/staff/add', newStaff);
         
         if(!staff.data){
             setLoading(false);

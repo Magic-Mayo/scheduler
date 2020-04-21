@@ -17,7 +17,7 @@ const Student = () => {
         e.preventDefault();
         if(!email) return setError('Please enter a valid email address!');
 
-        axios.get(`/student/find/${email}`).then(res => {
+        axios.get(`/api/student/find/${email}`).then(res => {
             if(!res.data) return setError('This email does not exist in Bootcamp Spot!  Please check the email address and try again.  If this error persists please contact your instructor or TA for further assistance.');
             setInstructors(res.data.staff);
             setUser(res.data);
@@ -25,7 +25,7 @@ const Student = () => {
     }
 
     const getInstructor = async instructor => {
-        await axios.get(`/availability/${instructor.id}`).then(schedule => {
+        await axios.get(`/api/availability/${instructor.id}`).then(schedule => {
             setAvailability(schedule.data);
             setCurrentInstructor(instructor);
             history.push(`/student/calendar/${instructor.id}`);

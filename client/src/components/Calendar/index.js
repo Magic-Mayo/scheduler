@@ -68,7 +68,7 @@ const Calendar = () => {
             }
         })
 
-        axios.put(`/schedule/${currentInstructor.id}/${user.id}`,
+        axios.put(`/api/schedule/${currentInstructor.id}/${user.id}`,
         {
             month: availableDays._id,
             daysIdx,

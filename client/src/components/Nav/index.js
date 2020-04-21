@@ -16,7 +16,7 @@ const NavBar = () => {
     const studentPath = location.pathname.split('/')[1] === 'student';
 
     const getInstructor = async instructor => {
-        await axios.get(`/availability/${instructor.id}`).then(schedule => {
+        await axios.get(`/api/availability/${instructor.id}`).then(schedule => {
             setAvailability(schedule.data);
             setCurrentInstructor(instructor);
             history.push(`/student/calendar/${instructor.id}`)
