@@ -116,8 +116,10 @@ const Calendar = () => {
     }
     
     useEffect(() => {
-        const [schedule] = availability.filter(val => val.month === parseInt(dateFormat(startMonth(selectedMonth), 't')));
-        setAvailableDays(schedule);
+        if(availability){
+            const [schedule] = availability.filter(val => val.month === parseInt(dateFormat(startMonth(selectedMonth), 't')));
+            setAvailableDays(schedule);
+        }
     }, [currentInstructor, selectedMonth, availability]);
 
     useEffect(() => {
