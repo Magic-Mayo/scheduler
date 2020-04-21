@@ -9,5 +9,4 @@ module.exports = (app) => {
     app.put('/api/availability/:date/:id', controller.updateAvailability);
     app.post('/api/availability/:id', controller.setAvailability);
     app.put('/api/schedule/:instructorId/:studentId', controller.scheduleTime);
-    // app.get('/student/instructors', controller.)
 }

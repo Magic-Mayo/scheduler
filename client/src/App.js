@@ -73,19 +73,19 @@ function App() {
                                 <Staff />
                             </Route>
                         </Switch>
-                            <Switch>
-                                <Route path='/(student|staff)/calendar/:instructorId?/:date?'>
-                                    {user ?
-                                        <Calendar />
-                                        :
-                                        <Redirect to={userType === 'staff' ? '/staff' : '/student'} />
-                                    }
-                                </Route>
-                                <Route path='/student/myschedule'>
-                                    {user ?
-                                        <Schedule />
+                        <Switch>
+                            <Route path='/(student|staff)/calendar/:instructorId?/:date?'>
+                                {user ?
+                                    <Calendar />
                                     :
-                                    <Redirect to='/student' />
+                                    <Redirect to={userType === 'staff' ? '/staff' : '/student'} />
+                                }
+                            </Route>
+                            <Route path='/student/myschedule'>
+                                {user ?
+                                    <Schedule />
+                                :
+                                <Redirect to='/student' />
                                 }
                             </Route>
                             <Route path='/student/myschedule'>
