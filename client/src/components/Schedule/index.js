@@ -1,11 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Wrapper, P, Button } from '../styledComponents';
 import {UserContext, InstructorContext} from '../../Context';
-import {format} from 'date-fns';
+import {format, fromUnixTime} from 'date-fns';
 import axios from 'axios';
 import Modal from '../Modal';
 import { useLocation } from 'react-router-dom';
-import { format as dateFormat } from 'date-fns'
 
 const Schedule = () => {
     const {user, setUser} = useContext(UserContext);
@@ -106,8 +105,8 @@ const Schedule = () => {
                                         margin='10px 15px'
                                         bgColor={ind % 2 === 0 ? '' : '#ba0c2f'}
                                         >
-                                            <span>{format(new Date(times.time * 1000), 'MMMM dd')}</span>
-                                            <span>{format(new Date(times.time * 1000), 'hh:mm a')}</span>
+                                            <span>{format(fromUnixTime(times.time), 'MMMM dd')}</span>
+                                            <span>{format(fromUnixTime(times.time), 'hh:mm a')}</span>
                                         </Button>
                                     ))}
                                     {/* <Button
