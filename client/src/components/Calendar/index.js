@@ -58,10 +58,10 @@ const Calendar = () => {
         let daysIdx, timesIdx;
 
         availableDays.days.map((day, ind) => {
-            if(dateFormat(new Date(day.date), 'MMdd') === dateFormat(new Date(date), 'MMdd')){
+            if(dateFormat(fromUnixTime(day.date), 'MMdd') === dateFormat(fromUnixTime(date), 'MMdd')){
                 daysIdx = ind;
                 return day.times.map((times, ind) => {
-                    if(dateFormat(new Date(times.time), 'HHmm') === dateFormat(new Date(time.time), 'HHmm')){
+                    if(dateFormat(fromUnixTime(times.time), 'HHmm') === dateFormat(fromUnixTime(time.time), 'HHmm')){
                         return timesIdx = ind;
                     }
                 })
@@ -77,7 +77,7 @@ const Calendar = () => {
             studentName: time.studentName,
             studentEmail: time.email,
             timeId: time._id,
-            time: parseInt(dateFormat(new Date(time.time), 't'))
+            time: time.time
         }).then(data => {
             if(data.data.staff /* && data.data.student */){
                 setLoading(false);
@@ -173,12 +173,12 @@ const Calendar = () => {
                     textAlign='center'
                     >
                         {timeScheduled ?
-                            `Your time has been reserved for ${dateFormat(new Date(timeToSchedule.time), 'hh:mm a')} on${' '}
-                            ${dateFormat(new Date(timeToSchedule.time), 'MMMM dd, yyyy')}!`
+                            `Your time has been reserved for ${dateFormat(fromUnixTime(timeToSchedule.time), 'hh:mm a')} on${' '}
+                            ${dateFormat(fromUnixTime(timeToSchedule.time), 'MMMM dd, yyyy')}!`
                         :
                             `What would you like to cover on${" "}
-                            ${dateFormat(new Date(timeToSchedule.time), 'MMMM dd, yyyy')}${" "}
-                            at ${dateFormat(new Date(timeToSchedule.time), 'hh:mm a')}?`
+                            ${dateFormat(fromUnixTime(timeToSchedule.time), 'MMMM dd, yyyy')}${" "}
+                            at ${dateFormat(fromUnixTime(timeToSchedule.time), 'hh:mm a')}?`
                         }
                     </P>
                     {!timeScheduled &&
