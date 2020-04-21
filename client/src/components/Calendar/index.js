@@ -29,7 +29,7 @@ const days = [
 const Calendar = () => {
     const inputRef = useRef(null);
     const {loading, refresh, setLoading, setRefresh} = useContext(InstructorContext);
-    const {availability, currentInstructor} = useContext(CurrentInstructorContext);
+    const {availability, currentInstructor, setAvailability} = useContext(CurrentInstructorContext);
     const {user, userType} = useContext(UserContext);
     const [selectedMonth, setSelectedMonth] = useState(Date.now());
     const [dateClicked, setDateClicked] = useState();
@@ -91,7 +91,7 @@ const Calendar = () => {
 
     const addTimeToSchedule = time => {
         setModal(() => {
-            if(availableDays.includes(time)) return availableDays[time].topic;
+            if(!userType && availableDays.includes(time)) return availableDays[time].topic;
         });
 
         setTimeToSchedule(prevState => {
@@ -106,7 +106,7 @@ const Calendar = () => {
             }
             
             return {...prevState, [dateFormat(startMonth(fromUnixTime(time)), 't')]: [...prevState[dateFormat(startMonth(fromUnixTime(time)), 't')], time]}
-        })
+        });
     }
         
     const scheduleTime = time => {
@@ -118,7 +118,7 @@ const Calendar = () => {
     useEffect(() => {
         const [schedule] = availability.filter(val => val.month === parseInt(dateFormat(startMonth(selectedMonth), 't')));
         setAvailableDays(schedule);
-    }, [currentInstructor, selectedMonth, refresh]);
+    }, [currentInstructor, selectedMonth, availability]);
 
     useEffect(() => {
         setTimeToSchedule(prevSched => {
@@ -147,6 +147,14 @@ const Calendar = () => {
         }
     }, [selectedTime]);
 
+    useEffect(() => {
+        if(location.pathname.split('student/')[1]){
+            axios.get(`/availability/${currentInstructor.id}`).then(schedule => {
+                setAvailability(schedule.data);
+            });
+        }
+    }, [refresh])
+
     return (
         <>
             {modal &&
@@ -158,7 +166,6 @@ const Calendar = () => {
 
             {selectedTime &&
                 <Modal >
-                    {console.log(timeToSchedule)}
                     <P
                     opacity={loading ? '.5' : ''}
                     textAlign='center'
@@ -375,6 +382,13 @@ const Calendar = () => {
                         </Wrapper>
                     </Wrapper>
                 }
+                {/* {userType === 'staff' && !location.pathname.split('/')[4] &&
+                    <Button
+                    onClick={reviewSchedule}
+                    >
+                        Review Schedule
+                    </Button>
+                } */}
             </Wrapper>
         </>
     )
