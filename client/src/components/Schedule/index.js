@@ -5,6 +5,7 @@ import {format} from 'date-fns';
 import axios from 'axios';
 import Modal from '../Modal';
 import { useLocation } from 'react-router-dom';
+import { format as dateFormat } from 'date-fns'
 
 const Schedule = () => {
     const {user, setUser} = useContext(UserContext);
