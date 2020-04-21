@@ -5,7 +5,12 @@ const PORT = process.env.PORT || 3001;
 const path = require('path');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost/scheduler';
-mongoose.connect(MONGODB_URI, { useFindAndModify: false, useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(MONGODB_URI, { 
+    useFindAndModify: false,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true
+});
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

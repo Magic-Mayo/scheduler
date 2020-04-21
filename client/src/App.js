@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 import {Switch, Route, useLocation, Redirect} from 'react-router-dom';
 import Student from './pages/Student';
-import Admin from './pages/Admin';
-// import Home from './components/Home';
+import Staff from './pages/Staff';
+import Home from './pages/Home';
 import Nav from './components/Nav';
 import Schedule from './components/Schedule';
 import Calendar from './components/Calendar';
@@ -38,6 +38,7 @@ function App() {
     const [availability, setAvailability] = useState();
     const [loading, setLoading] = useState(false);
     const [refresh, setRefresh] = useState(false);
+    const [userType, setUserType] = useState();
     let location = useLocation();
 
     // useEffect(() => {
@@ -57,26 +58,32 @@ function App() {
         <Wrapper flexDirection='row' w='100vw' h='100vh' justifyContent='flex-start' overflowX='hidden'>
             <InstructorContext.Provider value={{instructors, loading, refresh, setInstructors, setLoading, setRefresh}}>
                 <CurrentInstructorContext.Provider value={{currentInstructor, availability, setCurrentInstructor, setAvailability}}>
-                    <UserContext.Provider value={{user, setUser}}>
+                    <UserContext.Provider value={{user, userType, setUser, setUserType}}>
                     {location.pathname !== '/' &&
                         <Nav />
                     }
                         <Route exact path='/'>
-                            <Redirect to='/student' />
-                            {/* <Home /> */}
+                            <Home />
                         </Route>
                         <Switch>
                             <Route exact path='/student'>
                                 <Student />
                             </Route>
-                            <Route path='/admin'>
-                                <Admin />
+                            <Route exact path='/staff'>
+                                <Staff />
                             </Route>
                         </Switch>
-                        <Switch>
-                            <Route path='/student/calendar/:instructorId?/:date?'>
-                                {user ?
-                                    <Calendar />
+                            <Switch>
+                                <Route path='/(student|staff)/calendar/:instructorId?/:date?'>
+                                    {user ?
+                                        <Calendar />
+                                        :
+                                        <Redirect to={userType === 'staff' ? '/staff' : '/student'} />
+                                    }
+                                </Route>
+                                <Route path='/student/myschedule'>
+                                    {user ?
+                                        <Schedule />
                                     :
                                     <Redirect to='/student' />
                                 }

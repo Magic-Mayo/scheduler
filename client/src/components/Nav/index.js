@@ -1,16 +1,27 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Nav, Button, P, Wrapper} from '../styledComponents';
 import {InstructorContext, UserContext, CurrentInstructorContext} from '../../Context';
-import {Link, useLocation} from 'react-router-dom';
+import {Link, useLocation, useHistory} from 'react-router-dom';
 import {FontAwesomeIcon as FAIcon} from '@fortawesome/react-fontawesome';
+import axios from 'axios';
 
 const NavBar = () => {
     const [expanded, setExpanded] = useState(false);
     const [instructorExpand, setInstructorExpand] = useState(false);
-    const {instructors, loading, refresh, setLoading, setRefresh} = useContext(InstructorContext);
-    const {setCurrentInstructor} = useContext(CurrentInstructorContext);
+    const {instructors, loading, setRefresh} = useContext(InstructorContext);
+    const {setCurrentInstructor, setAvailability} = useContext(CurrentInstructorContext);
     const {user, setUser} = useContext(UserContext);
     const location = useLocation();
+    const history = useHistory();
+    const studentPath = location.pathname.split('/')[1] === 'student';
+
+    const getInstructor = async instructor => {
+        await axios.get(`/availability/${instructor.id}`).then(schedule => {
+            setAvailability(schedule.data);
+            setCurrentInstructor(instructor);
+            history.push(`/student/calendar/${instructor.id}`)
+        })
+    }
 
     useEffect(() => {
         setExpanded(false);
@@ -43,8 +54,9 @@ const NavBar = () => {
             >
                 {user ? user.name : 'Please Login'}
             </P>
+
             <Link
-            to={loading ? location.pathname : '/student'}
+            to={loading ? location.pathname : studentPath ? '/student' : '/staff/calendar'}
             >
                 <Button
                 h='50px'
@@ -58,27 +70,29 @@ const NavBar = () => {
                 </Button>
             </Link>
 
-            <Button
-            disp='flex'
-            padding='5px'
-            w='100%'
-            textAlign='left'
-            bgColor='inherit'
-            fontS='24px'
-            onClick={() => {
-                setExpanded(instructors ? true : !expanded && false);
-                setInstructorExpand(instructors ? !instructorExpand : false)
-            }}
-            >
-                <FAIcon icon='chalkboard-teacher' />
-                <P fontS='24px' margin='0 0 0 20px'>Instructor</P>
-            </Button>
+            {studentPath &&
+                <Button
+                disp='flex'
+                padding='5px'
+                w='100%'
+                textAlign='left'
+                bgColor='inherit'
+                fontS='24px'
+                onClick={() => {
+                    setExpanded(instructors ? true : !expanded && false);
+                    setInstructorExpand(instructors ? !instructorExpand : false)
+                }}
+                >
+                    <FAIcon icon='chalkboard-teacher' />
+                    <P fontS='24px' margin='0 0 0 20px'>Instructor</P>
+                </Button>
+            }
             {instructorExpand &&
                 instructors.map(ins => (
-                    <Link
-                    to={loading ? location.pathname : `/student/calendar/${ins.id}`}
+                    <Button
                     key={ins.id}
-                    onClick={() => setCurrentInstructor(ins)}
+                    onClick={() => getInstructor(ins)}
+                    bgColor='inherit'
                     >
                         <P
                         margin='5px 0 10px 50px'
@@ -88,12 +102,12 @@ const NavBar = () => {
                         >
                             - {ins.name}
                         </P>
-                    </Link>
+                    </Button>
                 ))
             }
             {user ?
                 <Link
-                to={loading ? location.pathname : '/student/myschedule'}
+                to={loading ? location.pathname : studentPath ? '/student/myschedule' : '/staff/myschedule'}
                 >
                     <Button
                     bgColor='inherit'
@@ -143,7 +157,7 @@ const NavBar = () => {
                 flexDirection='row'
                 alignItems='flex-end'
                 fontColor='#fff'
-                onClick={() => setRefresh(!refresh)}
+                onClick={() => setRefresh(prevState => !prevState)}
                 >
                     <Button
                     w='100%'

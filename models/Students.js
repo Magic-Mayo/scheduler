@@ -10,7 +10,7 @@ const StudentsSchema = new Schema({
         name: {type: String, require: true}
     }],
     scheduledTimes: [{
-        time: {type: Date, required: true},
+        time: {type: Number, required: true},
         instructorId: {type: String, require: true},
         timeId: {type: String, require: true},
         topic: String,

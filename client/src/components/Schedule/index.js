@@ -91,7 +91,10 @@ const Schedule = () => {
                                 overflowX='hidden'
                                 position='relative'
                                 >
-                                    {user.scheduledTimes.filter(ins => ins.instructorId === staff.id).sort((a,b) => parseInt(dateFormat(new Date(a.time), 'H')) - parseInt(dateFormat(new Date(b.time), 'H'))).map(times => (
+                                    {user.scheduledTimes
+                                    .filter(ins => ins.instructorId === staff.id)
+                                    .sort((a,b) => a.time - b.time)
+                                    .map(times => (
                                         <Button
                                         onClick={() => getTimeToShow(times)}
                                         key={times.timeId}
@@ -103,8 +106,8 @@ const Schedule = () => {
                                         margin='10px 15px'
                                         bgColor={ind % 2 === 0 ? '' : '#ba0c2f'}
                                         >
-                                            <span>{format(new Date(times.time), 'MMMM dd')}</span>
-                                            <span>{format(new Date(times.time), 'hh:mm a')}</span>
+                                            <span>{format(new Date(times.time * 1000), 'MMMM dd')}</span>
+                                            <span>{format(new Date(times.time * 1000), 'hh:mm a')}</span>
                                         </Button>
                                     ))}
                                     {/* <Button
