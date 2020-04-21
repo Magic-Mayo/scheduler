@@ -77,7 +77,7 @@ const Calendar = () => {
             studentName: time.studentName,
             studentEmail: time.email,
             timeId: time._id,
-            time: time.time
+            time: parseInt(dateFormat(new Date(time.time), 't'))
         }).then(data => {
             if(data.data.staff /* && data.data.student */){
                 setLoading(false);
@@ -110,14 +110,13 @@ const Calendar = () => {
     }
         
     const scheduleTime = time => {
-        console.log(time)
         setTopic(prevState => ({...prevState, [time._id]: ''}));
         setTimeToSchedule(() => !userType && time);
         setSelectedTime(true);
     }
     
     useEffect(() => {
-        const [schedule] = availability.filter(val => val.month === parseInt(dateFormat(startMonth(selectedMonth), 't')))
+        const [schedule] = availability.filter(val => val.month === parseInt(dateFormat(startMonth(selectedMonth), 't')));
         setAvailableDays(schedule);
     }, [currentInstructor, selectedMonth, refresh]);
 
