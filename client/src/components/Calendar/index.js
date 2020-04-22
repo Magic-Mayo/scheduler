@@ -151,7 +151,7 @@ const Calendar = () => {
 
     useEffect(() => {
         if(location.pathname.split('student/')[1]){
-            axios.get(`/availability/${currentInstructor.id}`).then(schedule => {
+            axios.get(`/api/availability/${currentInstructor.id}`).then(schedule => {
                 setAvailability(schedule.data);
             });
         }
