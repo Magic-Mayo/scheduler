@@ -7,14 +7,14 @@ const {format} = require('date-fns');
 const {sendConfirmation} = require('./email');
 
 module.exports = {
-    addNewStudents: async (req, res) => {
-        let authToken = req.body.authToken || null;
+    addNewStudents: async ({body, params}, res) => {
+        let authToken = body.authToken || null;
 
-        if(!req.body.authToken){
+        if(!body.authToken){
             let login = await axios({
                 url: 'https://bootcampspot.com/api/instructor/v1/login',
                 method: 'post',
-                data: {email: req.body.email, password: req.body.secret}
+                data: {email: body.email, password: body.secret}
             });
 
             authToken = login.data.authenticationInfo.authToken;
@@ -70,13 +70,13 @@ module.exports = {
         return res.json(allStudents)
     },
 
-    addNewStaff: async (req, res) => {
-        const staff = await Staff.findOne({email: req.body.email});
+    addNewStaff: async ({body, get, protocol}, res) => {
+        const staff = await Staff.findOne({email: body.email});
 
         let login = await axios({
             url: 'https://bootcampspot.com/api/instructor/v1/login',
             method: 'post',
-            data: {email: req.body.email, password: req.body.bcsPassword}
+            data: {email: body.email, password: body.bcsPassword}
         });
 
         if(!login.data.success || staff){
@@ -92,31 +92,31 @@ module.exports = {
         });
 
         
-        const hashed = await bcrypt.hash(req.body.password, 16);
+        const hashed = await bcrypt.hash(body.password, 16);
         
         Staff.create({
             id: me.data.userAccount.id,
             name: `${me.data.userAccount.firstName} ${me.data.userAccount.lastName}`,
             email: me.data.userAccount.email,
             pass: hashed,
-            bcsEmail: req.body.bcsEmail,
+            bcsEmail: body.bcsEmail,
             students: [],
             schedule: []
         }).then(async staff => {
-            const students = await axios.post(`${req.protocol}://${req.get('host')}/staff/${staff.id}/getstudents`, {authToken: authToken});
+            const students = await axios.post(`${protocol}://${get('host')}/staff/${staff.id}/getstudents`, {authToken: authToken});
             res.json(students.data)
         })
         .catch(err=>console.error(err));
 
     },
 
-    findOne: async (req, res) => {
-        if(req.body.password){
-            const staff = await Staff.findOne({email: req.body.email});
+    findOne: async ({body, params}, res) => {
+        if(body.password){
+            const staff = await Staff.findOne({email: body.email});
             let match;
             
             if(staff){
-                match = await bcrypt.compare(req.body.password, staff.pass);
+                match = await bcrypt.compare(body.password, staff.pass);
             }
             
             if(match){
@@ -126,7 +126,7 @@ module.exports = {
             return res.json(false);
         }
 
-        Students.findOne({email: req.params.email}).then(student => {
+        Students.findOne({email: params.email}).then(student => {
             res.json(student);
         }).catch(err => {
             console.error(err);
@@ -134,26 +134,47 @@ module.exports = {
         })
     },
 
-    getAvailability: (req,res) => {
-        Staff.findOne({id: req.params.id}).then(data => {
+    getAvailability: ({params},res) => {
+        Staff.findOne({id: params.id}).then(data => {
             res.json(data.schedule);
         })
     },
 
-    setAvailability: (req, res) => {
-        const {id} = req.params;
+    setAvailability: ({body, params}, res) => {
+        const {id} = params;
 
-        Staff.findOneAndUpdate({id: id, 'schedule.month': req.body.month}, {$push: {'schedule.$.days': req.body.days}}, {new: true}).then(data => {
+        // for(let i=0; i < body.sc)
+        Staff.findOneAndUpdate({id: id, 'schedule.month': body.month}, {$push: {'schedule.$.days': body.days}}, {new: true}).then(data => {
             res.json(data);
         }).catch(err => {
             res.json(err);
         })
     },
 
-    scheduleTime: async (req, res) => {
-        const {topic, studentName, studentEmail, month, daysIdx, timesIdx, timeId, time} = req.body;
-        const {studentId, instructorId} = req.params;
+    scheduleTime: async ({body, params}, res) => {
+        const {topic, studentName, studentEmail, month, daysIdx, timesIdx, timeId, time} = body;
+        const {studentId, instructorId} = params;
         const set = {$set: {}};
+        let timeNotAvail;
+
+        await Staff.findOne({id: instructorId}).then(staff => {
+            let findMonth;
+
+            for(let i=0; i < staff.schedule.length; i++){
+                const schedule = staff.schedule;
+                if(schedule[i].month == month){
+                    findMonth = i;
+                    break;
+                }
+            }
+
+            if(staff.schedule[findMonth].days[daysIdx].times[timesIdx].studentEmail){
+                return timeNotAvail = true;
+            }
+            
+        })
+        
+        if(timeNotAvail) return res.json(false);
 
         set.$set[`schedule.$.days.${daysIdx}.times.${timesIdx}`] = {
             topic: topic,
@@ -163,7 +184,7 @@ module.exports = {
         };
         
         const staff = await Staff.findOneAndUpdate(
-            {id: instructorId, 'schedule._id': month},
+            {id: instructorId, 'schedule.month': month},
             set,
             {new: true})
 
@@ -183,8 +204,8 @@ module.exports = {
         return res.json({student: await student.scheduledTimes, staff: await staff.schedule})
     },
 
-    updateAvailability: (req, res) => {
-        Staff.findOneAndUpdate({id: req.params.id}, {schedule: [req.body]}, {new:true}).then(data => {
+    updateAvailability: ({body, params}, res) => {
+        Staff.findOneAndUpdate({id: params.id}, {schedule: [body]}, {new:true}).then(data => {
             res.json(data)
         })
     }
