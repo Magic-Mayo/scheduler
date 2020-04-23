@@ -51,7 +51,7 @@ const Calendar = () => {
 
     const requestScheduledTime = time => {
         setLoading(true);
-        const date = parseInt(dateClicked) * 1000;
+        const date = parseInt(dateClicked);
         time.topic = topic[time._id];
         time.studentName = user.name;
         time.email = user.email;
@@ -70,7 +70,7 @@ const Calendar = () => {
 
         axios.put(`/api/schedule/${currentInstructor.id}/${user.id}`,
         {
-            month: availableDays._id,
+            month: parseInt(dateFormat(startMonth(fromUnixTime(date)), 't')),
             daysIdx,
             timesIdx,
             topic: time.topic,
