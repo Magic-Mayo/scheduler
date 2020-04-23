@@ -236,7 +236,7 @@ const Calendar = () => {
             h='100%'
             margin='0 0 0 50px'
             bgColor={selectedTime || modal ? '#ccc' : ''}
-            onClick={modal || selectedTime && !loading ? () => {setModal(); setSelectedTime()} : null}
+            onClick={(modal || selectedTime) && !loading ? () => {setModal(); setSelectedTime()} : null}
             >
                 <Wrapper
                 top='5%'
