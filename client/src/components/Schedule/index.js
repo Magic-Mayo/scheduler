@@ -7,7 +7,7 @@ import Modal from '../Modal';
 import { useLocation } from 'react-router-dom';
 
 const Schedule = () => {
-    const {user, setUser} = useContext(UserContext);
+    const {user, userType, setUser} = useContext(UserContext);
     const {instructors, refresh} = useContext(InstructorContext);
     const [showTime, setShowTime] = useState();
     const location = useLocation();
@@ -18,9 +18,11 @@ const Schedule = () => {
     }
 
     useEffect(() => {
-        axios.get(`/api/student/find/${user.email}`).then(student => {
-            setUser(student.data);
-        })
+        if(!userType){
+            axios.get(`/api/student/find/${user.email}`).then(student => {
+                setUser(student.data);
+            })
+        }
     }, [refresh])
 
     useEffect(() => {
