@@ -142,13 +142,28 @@ module.exports = {
 
     setAvailability: ({body, params}, res) => {
         const {id} = params;
+        let error;
+        const data = [];
 
-        // for(let i=0; i < body.sc)
-        Staff.findOneAndUpdate({id: id, 'schedule.month': body.month}, {$push: {'schedule.$.days': body.days}}, {new: true}).then(data => {
-            res.json(data);
-        }).catch(err => {
-            res.json(err);
-        })
+        for(let month in body){
+            Staff.findOne({id: id})
+            .then(staff => {
+                if(staff.schedule.filter(month => month.month == month).length){
+                    Staff.findOneAndUpdate({id: id, 'schedule.month': body.month}, {$set: {'schedule.$.days': body.days}}, {new: true})
+                    .then(staff => data.push(staff))
+                } else {
+                    Staff.findOneAndUpdate({id: id}, {schedule: {month: month, days: body[month].days}}, {new: true, upsert: true})
+                    .then(staff => data.push(staff))
+                }
+            })
+            .catch(err => {
+                return error = err;
+            })
+        }
+
+        if(error) return res.status(500).json(error);
+
+        res.json(data)
     },
 
     scheduleTime: async ({body, params}, res) => {
