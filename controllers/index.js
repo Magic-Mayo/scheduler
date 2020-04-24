@@ -148,20 +148,21 @@ module.exports = {
         for(let month in body){
             Staff.findOne({id: id})
             .then(staff => {
-                if(staff.schedule.filter(month => month.month == month).length){
-                    Staff.findOneAndUpdate({id: id, 'schedule.month': body.month}, {$set: {'schedule.$.days': body.days}}, {new: true})
-                    .then(staff => data.push(staff))
+                if(staff.schedule.filter(sched => sched.month == month).length){
+                    Staff.findOneAndUpdate({id: id, 'schedule.month': body.month}, {$set: {'schedule.$.days': body[month].days}}, {new: true})
+                    .then(staff => data.push(staff.schedule))
+                    .catch(err => error = err)
                 } else {
-                    Staff.findOneAndUpdate({id: id}, {schedule: {month: month, days: body[month].days}}, {new: true, upsert: true})
-                    .then(staff => data.push(staff))
+                    Staff.findOneAndUpdate({id: id}, {$push: {schedule: {month: month, days: body[month].days}}}, {new: true, upsert: true})
+                    .then(staff => data.push(staff.schedule))
+                    // .then(staff => console.log('else', staff))
+                    .catch(err => error = err)
                 }
             })
-            .catch(err => {
-                return error = err;
-            })
+            .catch(err => error = err);
+            if(error) return res.json(error);
         }
-
-        if(error) return res.status(500).json(error);
+        console.log(data)
 
         res.json(data)
     },
