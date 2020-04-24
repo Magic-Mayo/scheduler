@@ -3,6 +3,7 @@ import styled from 'styled-components';
 export default styled.p`
     font-size: ${({fontS}) => fontS || '18px'};
     font-weight: ${({fontW}) => fontW || ''};
+    font-style: ${({fontStyle}) => fontStyle || ''};
     grid-column: ${({gridColumn}) => gridColumn || ''};
     text-align: ${({textAlign}) => textAlign || 'left'};
     width: ${({w}) => w || ''};
