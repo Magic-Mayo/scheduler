@@ -4,17 +4,19 @@ import {
     format as dateFormat,
     addMonths,
     subMonths,
-    fromUnixTime
+    fromUnixTime,
+    startOfDay
 } from 'date-fns';
 import { Wrapper, Button, P, Input } from '../styledComponents';
 import Modal from '../Modal';
-import {useHistory, useLocation} from 'react-router-dom';
+import {useHistory, useLocation, Link} from 'react-router-dom';
 import {InstructorContext, UserContext, CurrentInstructorContext} from '../../Context';
 import axios from 'axios';
 import {HashLoader as Loading} from 'react-spinners';
 import {FontAwesomeIcon as FAIcon} from '@fortawesome/react-fontawesome';
 import TimesForDate from './TimesForDate';
 import PopulateCalendar from './PopulateCalendar';
+import Review from './Review';
 
 const days = [
     'Sun',
@@ -38,7 +40,10 @@ const Calendar = () => {
     const [availableDays, setAvailableDays] = useState([]);
     const [timeToSchedule, setTimeToSchedule] = useState({[dateFormat(startMonth(new Date()), 't')]: []});
     const [timeScheduled, setTimeScheduled] = useState();
+    const [schedule, setSchedule] = useState();
     const [modal, setModal] = useState();
+    const [review, setReview] = useState();
+    const [error, setError] = useState();
     const history = useHistory();
     let location = useLocation();
 
@@ -51,7 +56,7 @@ const Calendar = () => {
 
     const requestScheduledTime = time => {
         setLoading(true);
-        const date = parseInt(dateClicked) * 1000;
+        const date = parseInt(dateClicked);
         time.topic = topic[time._id];
         time.studentName = user.name;
         time.email = user.email;
@@ -70,7 +75,7 @@ const Calendar = () => {
 
         axios.put(`/api/schedule/${currentInstructor.id}/${user.id}`,
         {
-            month: availableDays._id,
+            month: parseInt(dateFormat(startMonth(fromUnixTime(date)), 't')),
             daysIdx,
             timesIdx,
             topic: time.topic,
@@ -79,12 +84,13 @@ const Calendar = () => {
             timeId: time._id,
             time: time.time
         }).then(data => {
+            setLoading(false);
+            setTimeScheduled(true);
             if(data.data.staff /* && data.data.student */){
-                setLoading(false);
-                return setTimeScheduled(true);
+                return;
             }
-
-            setModal('There was a problem scheduling the time.  Please check that the time is still available and try again.')
+            
+            setError('There was a problem scheduling the time.  Please hit the refresh button to check that the time is still available and try again.')
             setRefresh(!refresh)
         })
     }
@@ -92,6 +98,7 @@ const Calendar = () => {
     const addTimeToSchedule = time => {
         setModal(() => {
             if(!userType && availableDays.includes(time)) return availableDays[time].topic;
+            return;
         });
 
         setTimeToSchedule(prevState => {
@@ -107,6 +114,25 @@ const Calendar = () => {
             
             return {...prevState, [dateFormat(startMonth(fromUnixTime(time)), 't')]: [...prevState[dateFormat(startMonth(fromUnixTime(time)), 't')], time]}
         });
+    }
+
+    const submitSchedule = () => {
+        const schedToSend = {};
+        for(let month in timeToSchedule){
+            const monthInObj = timeToSchedule[month];
+            schedToSend[month] = {};
+            
+            monthInObj.map(time => {
+                if(!schedToSend[month][dateFormat(startOfDay(fromUnixTime(time)), 't')]){
+                    return schedToSend[month][dateFormat(startOfDay(fromUnixTime(time)), 't')] = {times: [time]}
+                }
+
+                return schedToSend[month][dateFormat(startOfDay(fromUnixTime(time)), 't')].times.push(time)
+            })
+        }
+        console.log(schedToSend)
+
+        // axios.post(`/api/availability/${user.id}`, schedule)
     }
         
     const scheduleTime = time => {
@@ -124,7 +150,11 @@ const Calendar = () => {
 
     useEffect(() => {
         setTimeToSchedule(prevSched => {
-            if(userType === 'staff' && !prevSched[dateFormat(startMonth(fromUnixTime(selectedMonth)), 't')]){
+            if(userType !== 'staff'){
+                return prevSched;
+            }
+
+            if(!prevSched[dateFormat(startMonth(fromUnixTime(selectedMonth)), 't')]){
                 const newSched = {...prevSched};
                 newSched[dateFormat(startMonth(new Date(selectedMonth)), 't')] = [];
                 return newSched;
@@ -157,6 +187,10 @@ const Calendar = () => {
         }
     }, [refresh])
 
+    useEffect(() => {
+        if(location.pathname !== '/staff/calendar/review') setReview();
+    }, [location.pathname])
+
     return (
         <>
             {modal &&
@@ -172,14 +206,18 @@ const Calendar = () => {
                     opacity={loading ? '.5' : ''}
                     textAlign='center'
                     >
-                        {timeScheduled ?
-                            `Your time has been reserved for ${dateFormat(fromUnixTime(timeToSchedule.time), 'hh:mm a')} on${' '}
-                            ${dateFormat(fromUnixTime(timeToSchedule.time), 'MMMM dd, yyyy')}!`
+                        {!error ?
+                            timeScheduled ?
+                                `Your time has been reserved for ${dateFormat(fromUnixTime(timeToSchedule.time), 'hh:mm a')} on${' '}
+                                ${dateFormat(fromUnixTime(timeToSchedule.time), 'MMMM dd, yyyy')}!`
+                            :
+                                `What would you like to cover on${" "}
+                                ${dateFormat(fromUnixTime(timeToSchedule.time), 'MMMM dd, yyyy')}${" "}
+                                at ${dateFormat(fromUnixTime(timeToSchedule.time), 'hh:mm a')}?`
                         :
-                            `What would you like to cover on${" "}
-                            ${dateFormat(fromUnixTime(timeToSchedule.time), 'MMMM dd, yyyy')}${" "}
-                            at ${dateFormat(fromUnixTime(timeToSchedule.time), 'hh:mm a')}?`
+                            error
                         }
+
                     </P>
                     {!timeScheduled &&
                         <Input
@@ -219,7 +257,11 @@ const Calendar = () => {
                                 }}
                                 bgColor='#ba0c2f'
                                 >
-                                    {timeScheduled ?
+                                    {error ?
+                                        'Back'
+                                    :
+
+                                    timeScheduled ?
                                         'Okay!'
                                     :
                                         'Cancel'
@@ -236,7 +278,7 @@ const Calendar = () => {
             h='100%'
             margin='0 0 0 50px'
             bgColor={selectedTime || modal ? '#ccc' : ''}
-            onClick={modal || selectedTime && !loading ? () => {setModal(); setSelectedTime()} : null}
+            onClick={(modal || selectedTime) && !loading ? () => {setModal(); setSelectedTime()} : null}
             >
                 <Wrapper
                 top='5%'
@@ -247,12 +289,18 @@ const Calendar = () => {
                     Welcome back, {user.name}!
                 </Wrapper>
 
+                <P>
+                    {!userType ?
+                        !dateClicked && `You are viewing ${currentInstructor.name}'s calendar`
+                    
+                    :
 
-                {!dateClicked &&
-                    <P>
-                        {!userType ? `You are viewing ${currentInstructor.name}'s calendar` : 'Select a day to choose your availability'}
-                    </P>
-                }
+                        review ?
+                            'Please review your selected dates and times before submitting.  Click any time to remove it.'
+                        :
+                            `Select ${dateClicked ? 'times' : 'a day to choose your availability'}`
+                    }
+                </P>
                 
                 <Wrapper
                 maxWidth='980px'
@@ -261,14 +309,15 @@ const Calendar = () => {
                 w='80%'
                 border='solid 2px #666'
                 h='60%'
-                display={location.pathname === `/${userType ? 'staff' : 'student'}/calendar${!userType ? `/${currentInstructor.id}` : ''}` ? 'grid' : ''}
+                display={review ? '' : location.pathname === `/${userType ? 'staff' : 'student'}/calendar${!userType ? `/${currentInstructor.id}` : ''}` ? 'grid' : ''}
                 flexDirection={dateClicked ? 'row' : ''}
                 boxShadow='#ccc 10px 10px 15px'
                 flexWrap={dateClicked ? 'wrap' : ''}
                 position='relative'
                 >
 
-                    {location.pathname === `/${userType ? 'staff' : 'student'}/calendar${!userType ? `/${currentInstructor.id}` : ''}` ?
+                    {!review ?
+                    location.pathname === `/${userType ? 'staff' : 'student'}/calendar${!userType ? `/${currentInstructor.id}` : ''}` ?
                         <>
                             <Wrapper
                             className='calendar-month'
@@ -330,6 +379,33 @@ const Calendar = () => {
                             currentInstructor={currentInstructor}
                             />
                         </>
+                    :
+                        <Review
+                        timeToSchedule={timeToSchedule}
+                        addTimeToSchedule={addTimeToSchedule}
+                        schedule={schedule}
+                        setSchedule={setSchedule}
+                        />
+                    }
+                    {review &&
+                        <Button
+                        onClick={history.goBack}
+                        // noCursor={selectedTime}
+                        position='absolute'
+                        left='-70px'
+                        fontS='50px'
+                        w='unset'
+                        h='unset'
+                        fontColor='#000'
+                        bgColor='inherit'
+                        top='50%'
+                        transform='translateY(-50%)'
+                        className='hello'
+                        >
+                            <FAIcon
+                            icon='angle-double-left'
+                            />
+                        </Button>
                     }
                 </Wrapper>
                 
@@ -384,13 +460,16 @@ const Calendar = () => {
                         </Wrapper>
                     </Wrapper>
                 }
-                {/* {userType === 'staff' && !location.pathname.split('/')[4] &&
+                {userType === 'staff' &&
                     <Button
-                    onClick={reviewSchedule}
+                    onClick={review ? submitSchedule : () => {setReview(true); history.push('/staff/calendar/review')}}
+                    margin='35px 0'
+                    w='200px'
+                    h='75px'
                     >
-                        Review Schedule
+                        {review ?  'Submit Schedule' : 'Review Schedule'}
                     </Button>
-                } */}
+                }
             </Wrapper>
         </>
     )
