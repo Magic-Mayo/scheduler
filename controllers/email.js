@@ -14,7 +14,7 @@ module.exports = {
         })
 
         const message = {
-            from: 'Virtual Office Hours',
+            from: process.env.EMAIL_ADDRESS,
             replyTo: staffEmail,
             to: studentEmail,
             cc: staffEmail,
@@ -27,6 +27,7 @@ module.exports = {
                 console.error(err)
             }
 
+            return;
         })
     }
 }
