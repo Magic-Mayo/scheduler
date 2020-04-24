@@ -119,20 +119,29 @@ const Calendar = () => {
     const submitSchedule = () => {
         const schedToSend = {};
         for(let month in timeToSchedule){
+            if(!timeToSchedule[month].length) continue;
+            
             const monthInObj = timeToSchedule[month];
-            schedToSend[month] = {};
+            schedToSend[month] = {days: []};
+            let lastDate;
             
             monthInObj.map(time => {
-                if(!schedToSend[month][dateFormat(startOfDay(fromUnixTime(time)), 't')]){
-                    return schedToSend[month][dateFormat(startOfDay(fromUnixTime(time)), 't')] = {times: [time]}
+                const day = dateFormat(startOfDay(fromUnixTime(time)), 't');
+                const findDay = schedToSend[month].days.filter((time, ind) => {
+                    lastDate = ind;
+                    return time.date === day
+                });
+
+                if(!findDay.length){
+                    schedToSend[month].days.push({date: day, times: [{time: time}]});
+                    return lastDate = day;
                 }
 
-                return schedToSend[month][dateFormat(startOfDay(fromUnixTime(time)), 't')].times.push(time)
+                return schedToSend[month].days[lastDate].times.push({time: time})
             })
         }
-        console.log(schedToSend)
 
-        // axios.post(`/api/availability/${user.id}`, schedule)
+        axios.post(`/api/availability/${user.id}`, schedToSend).then(res => console.log(res))
     }
         
     const scheduleTime = time => {
@@ -154,7 +163,7 @@ const Calendar = () => {
                 return prevSched;
             }
 
-            if(!prevSched[dateFormat(startMonth(fromUnixTime(selectedMonth)), 't')]){
+            if(!prevSched[dateFormat(startMonth(new Date(selectedMonth)), 't')]){
                 const newSched = {...prevSched};
                 newSched[dateFormat(startMonth(new Date(selectedMonth)), 't')] = [];
                 return newSched;
