@@ -26,7 +26,9 @@ const Student = () => {
 
     const getInstructor = async instructor => {
         await axios.get(`/api/availability/${instructor.id}`).then(schedule => {
-            setAvailability(schedule.data);
+            const times = [];
+            schedule.data.forEach(time => times.push(time.time));
+            setAvailability({schedule: schedule.data, times: times});
             setCurrentInstructor(instructor);
             history.push(`/student/calendar/${instructor.id}`);
         });

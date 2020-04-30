@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Wrapper, P, Button } from '../styledComponents';
 import {
     format as dateFormat,
@@ -7,16 +7,13 @@ import {
 }
 from 'date-fns';
 
-const TimesForDate = ({dateClicked, timeToSchedule, selectedTime, scheduleTime, addTimeToSchedule, userType, availableDays, currentInstructor}) => {
-    let today;
+const TimesForDate = ({dateClicked, timeToSchedule, selectedTime, scheduleTime, addTimeToSchedule, userType, availability, currentInstructor}) => {
     let sortedTimes;
 
     if(!userType){
-        [today] = availableDays.days.filter(days =>
-            dateFormat(fromUnixTime(days.date), 'dd') === dateFormat(fromUnixTime(dateClicked), 'dd')
-        )
-
-        sortedTimes = today.times.sort((a,b) => a.time - b.time);
+        sortedTimes = availability.schedule.filter(time =>
+            !time.studentEmail && dateFormat(fromUnixTime(time.time), 'MMddyyyy') === dateFormat(fromUnixTime(dateClicked), 'MMddyyyy'))
+        .sort((a,b) => a - b);
     } else {
         sortedTimes = [
             (parseInt(dateClicked) + 3600 * 9).toString(),
@@ -57,14 +54,14 @@ const TimesForDate = ({dateClicked, timeToSchedule, selectedTime, scheduleTime, 
             margin='50px 0 0 0'
             >
                 {!userType ?
-                    sortedTimes.filter(avail => !avail.studentEmail)
-                    .map(time => (
+                    sortedTimes
+                    .map((time, ind) => (
                         <Button
-                        key={time._id}
+                        key={ind}
                         h='75px'
                         fontS='14px'
                         onClick={selectedTime ? null :
-                            () => {scheduleTime(time)}
+                            () => {scheduleTime(time.time)}
                         }
                         noCursor={selectedTime}
                         margin='25px'

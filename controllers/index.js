@@ -140,68 +140,46 @@ module.exports = {
         })
     },
 
-    setAvailability: ({body, params}, res) => {
+    setAvailability: async ({body, params}, res) => {
         const {id} = params;
-        let error;
-        const data = [];
+        const error = {};
+        const findStaff = await Staff.findOne({id: id});
 
+        if(!findStaff) return res.json({error: true});
+        
         for(let month in body){
-            Staff.findOne({id: id})
-            .then(staff => {
-                if(staff.schedule.filter(sched => sched.month == month).length){
-                    Staff.findOneAndUpdate({id: id, 'schedule.month': body.month}, {$set: {'schedule.$.days': body[month].days}}, {new: true})
-                    .then(staff => data.push(staff.schedule))
-                    .catch(err => error = err)
-                } else {
-                    Staff.findOneAndUpdate({id: id}, {$push: {schedule: {month: month, days: body[month].days}}}, {new: true, upsert: true})
-                    .then(staff => data.push(staff.schedule))
-                    // .then(staff => console.log('else', staff))
-                    .catch(err => error = err)
-                }
-            })
-            .catch(err => error = err);
-            if(error) return res.json(error);
-        }
-        console.log(data)
+            if(findStaff.schedule.filter(sched => sched.month == month).length){
+                await Staff.findOneAndUpdate({id: id, 'schedule.month': month}, {'schedule.$.days': body[month].days}, {new: true, upsert: true});
+            } else {
+                await Staff.findOneAndUpdate({id: id}, {$push: {schedule: {month: month, days: body[month].days}}}, {new: true});
+            }
 
-        res.json(data)
+            if(error.error) return res.json(error);
+        }
+
+        const newSched = await Staff.findOne({id: id});
+
+        res.json(newSched.schedule);
+
     },
 
     scheduleTime: async ({body, params}, res) => {
-        const {topic, studentName, studentEmail, month, daysIdx, timesIdx, timeId, time} = body;
+        const {topic, studentName, studentEmail, time} = body;
         const {studentId, instructorId} = params;
-        const set = {$set: {}};
         let timeNotAvail;
 
+        console.log(studentEmail)
         await Staff.findOne({id: instructorId}).then(staff => {
-            let findMonth;
-
-            for(let i=0; i < staff.schedule.length; i++){
-                const schedule = staff.schedule;
-                if(schedule[i].month == month){
-                    findMonth = i;
-                    break;
-                }
-            }
-
-            if(staff.schedule[findMonth].days[daysIdx].times[timesIdx].studentEmail){
+            if(staff.schedule.filter(time => time.time === time && !time.studentEmail).length){
                 return timeNotAvail = true;
             }
-            
         })
         
         if(timeNotAvail) return res.json(false);
-
-        set.$set[`schedule.$.days.${daysIdx}.times.${timesIdx}`] = {
-            topic: topic,
-            studentEmail: studentEmail,
-            studentName: studentName,
-            time: time
-        };
         
         const staff = await Staff.findOneAndUpdate(
-            {id: instructorId, 'schedule.month': month},
-            set,
+            {id: instructorId, 'schedule.time': time},
+            {$set: {'schedule.$': body}},
             {new: true})
 
         const student = await Students.findOneAndUpdate(
@@ -209,7 +187,6 @@ module.exports = {
             {$push: {
                 scheduledTimes: {
                     instructorId: instructorId,
-                    timeId: timeId,
                     time: time,
                     topic: topic
                 }

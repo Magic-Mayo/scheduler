@@ -1,21 +1,23 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
     startOfMonth as startMonth,
     endOfMonth as endMonth,
     startOfWeek as startWeek,
     endOfWeek as endWeek,
     format as dateFormat,
+    startOfDay,
     fromUnixTime,
     addDays
 } from 'date-fns';
 import { Wrapper, Button } from '../styledComponents';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
-const PopulateCalendar = ({ setDateClicked, selectedMonth, availableDays, userType, currentInstructor, user, error }) => {
+const PopulateCalendar = ({ setDateClicked, selectedMonth, userType, availability, currentInstructor, user, error }) => {
+    const location = useLocation();
 
     const weeks = [];
     const days = [];
-    const currentToday = new Date();
+    const currentToday = Date.now()/1000;
     
     const startOfMonth = startMonth(selectedMonth);
     const endOfMonth = endMonth(startOfMonth);
@@ -24,19 +26,13 @@ const PopulateCalendar = ({ setDateClicked, selectedMonth, availableDays, userTy
     
     let currentDay = startOfWeek;
     let numberedDate;
-    const available = [];
-    const date = availableDays?.days?.map(date => {
-        const filtered = date.times.filter(times => !times.studentEmail).length;
-        if(filtered){
-            available.push(dateFormat(fromUnixTime(date.date), 'd'))
-        }
-    })
-    
+
     while(currentDay <= endofWeek){
         for(let i = 0; i < 7; i++){
             const today = currentDay;
             numberedDate = dateFormat(currentDay, 'd');
-            const time = available.includes(numberedDate);
+            const time = availability.schedule.some(time => !time.studentEmail && dateFormat(startOfDay(fromUnixTime(time.time)), 'MMddyyyy') === dateFormat(new Date(currentDay), 'MMddyyyy'));
+            const future = parseInt(dateFormat(startOfDay(fromUnixTime(currentToday)), 't')) > parseInt(dateFormat(new Date(today), 't'));
             days.push(
                 !userType && !time ?
                     <Wrapper w='100%' key={currentDay}>
@@ -63,26 +59,29 @@ const PopulateCalendar = ({ setDateClicked, selectedMonth, availableDays, userTy
                     <Link
                     className='link'
                     key={currentDay}
-                    to={`/${userType ? 'staff' : 'student'}/calendar/${userType ? user.id : currentInstructor.id}/${dateFormat(currentDay, 'MMddyyyy')}`}
+                    to={future ? location.pathname : `/${userType ? 'staff' : 'student'}/calendar/${userType ? user.id : currentInstructor.id}/${dateFormat(currentDay, 'MMddyyyy')}`}
                     >
                         <Button
                         className={
-                            dateFormat(selectedMonth, 'MM') === dateFormat(currentToday, 'MM') ?
-                            dateFormat(today, 'MMddyyyy') === dateFormat(currentToday, 'MMddyyyy') ? 'today' : ''
-                            : ''}
-                        onClick={() => setDateClicked(dateFormat(new Date(today), 't'))}
-                        bgColor={error ? '#ccc' : '#fff'}
+                            dateFormat(selectedMonth, 'MM') === dateFormat(fromUnixTime(currentToday), 'MM') ?
+                                dateFormat(today, 'MMddyyyy') === dateFormat(fromUnixTime(currentToday), 'MMddyyyy') ? 'today' : ''
+                            : ''
+                        }
+                        onClick={() => setDateClicked(prevState => future ? prevState : dateFormat(new Date(today), 't'))}
+                        bgColor={(userType === 'staff' && future) || error ? '#ccc' : '#fff'}
                         calendar
                         w='100%'
                         padding='0 8px 0 0'
                         fontColor={dateFormat(currentDay, 'MM') === dateFormat(startOfMonth, 'MM') ?
-                            '#000' : 'rgba(0,0,0,.2)'}
+                            '#000' : 'rgba(0,0,0,.2)'
+                        }
                         borderRadius='0'
                         borderLeft={i !== 0 ? '.25px solid #ccc' : ''}
                         borderRight={i !== 6 ? '.25px solid #ccc' : ''}
                         h='100%'
                         disp='flex'
                         justifyContent='flex-end'
+                        noCursor={future}
                         >
                             <Wrapper
                             justifyContent='unset'
