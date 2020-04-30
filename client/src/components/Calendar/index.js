@@ -37,7 +37,6 @@ const Calendar = () => {
     const [dateClicked, setDateClicked] = useState();
     const [selectedTime, setSelectedTime] = useState();
     const [topic, setTopic] = useState({});
-    const [availableDays, setAvailableDays] = useState([]);
     const [timeToSchedule, setTimeToSchedule] = useState({[dateFormat(startMonth(new Date()), 't')]: []});
     const [timeScheduled, setTimeScheduled] = useState();
     const [schedule, setSchedule] = useState();
@@ -56,34 +55,15 @@ const Calendar = () => {
 
     const requestScheduledTime = time => {
         setLoading(true);
-        const date = parseInt(dateClicked);
-        time.topic = topic[time._id];
-        time.studentName = user.name;
-        time.email = user.email;
-        let daysIdx, timesIdx;
 
-        availableDays.days.map((day, ind) => {
-            if(dateFormat(fromUnixTime(day.date), 'MMdd') === dateFormat(fromUnixTime(date), 'MMdd')){
-                daysIdx = ind;
-                return day.times.map((times, ind) => {
-                    if(dateFormat(fromUnixTime(times.time), 'HHmm') === dateFormat(fromUnixTime(time.time), 'HHmm')){
-                        return timesIdx = ind;
-                    }
-                })
-            }
-        })
-
-        axios.put(`/api/schedule/${currentInstructor.id}/${user.id}`,
+        axios.put(`/api/schedule/${currentInstructor.id}/${user.id}`, 
         {
-            month: parseInt(dateFormat(startMonth(fromUnixTime(date)), 't')),
-            daysIdx,
-            timesIdx,
-            topic: time.topic,
-            studentName: time.studentName,
-            studentEmail: time.email,
-            timeId: time._id,
-            time: time.time
-        }).then(data => {
+            time: time,
+            topic: topic[time],
+            studentName: user.name,
+            studentEmail: user.email
+        })
+        .then(data => {
             setLoading(false);
             setTimeScheduled(true);
             if(data.data.staff /* && data.data.student */){
@@ -96,11 +76,6 @@ const Calendar = () => {
     }
 
     const addTimeToSchedule = time => {
-        setModal(() => {
-            if(!userType && availableDays.includes(time)) return availableDays[time].topic;
-            return;
-        });
-
         setTimeToSchedule(prevState => {
             if(timeToSchedule[dateFormat(startMonth(fromUnixTime(time)), 't')].includes(time)){
                 const newTime = {...prevState}
@@ -118,6 +93,7 @@ const Calendar = () => {
 
     const submitSchedule = () => {
         const schedToSend = {};
+
         for(let month in timeToSchedule){
             if(!timeToSchedule[month].length) continue;
             
@@ -149,13 +125,24 @@ const Calendar = () => {
         setTimeToSchedule(() => !userType && time);
         setSelectedTime(true);
     }
-    
-    useEffect(() => {
-        if(availability){
-            const [schedule] = availability.filter(val => val.month === parseInt(dateFormat(startMonth(selectedMonth), 't')));
-            setAvailableDays(schedule);
-        }
-    }, [currentInstructor, selectedMonth, availability]);
+
+    // useEffect(() => {
+    //     setTimeToSchedule(() => {
+    //         if(availability){
+    //             const copyAvail = availability;
+    //             const newSched = {};
+    //             copyAvail.forEach(month => {
+    //                 newSched[month.month] = [];
+    //                 month.days.forEach(day => {
+    //                     day.times.forEach(time => {
+    //                         newSched[month.month].push(time.time.toString())
+    //                     })
+    //                 })
+    //             })
+    //             return newSched;
+    //         }
+    //     })
+    // }, [])
 
     useEffect(() => {
         setTimeToSchedule(prevSched => {
@@ -191,7 +178,9 @@ const Calendar = () => {
     useEffect(() => {
         if(location.pathname.split('student/')[1]){
             axios.get(`/api/availability/${currentInstructor.id}`).then(schedule => {
-                setAvailability(schedule.data);
+                const times = [];
+                schedule.data.forEach(time => times.push(time.time));
+                setAvailability({schedule: schedule.data, times: times});
             });
         }
     }, [refresh])
@@ -217,12 +206,12 @@ const Calendar = () => {
                     >
                         {!error ?
                             timeScheduled ?
-                                `Your time has been reserved for ${dateFormat(fromUnixTime(timeToSchedule.time), 'hh:mm a')} on${' '}
-                                ${dateFormat(fromUnixTime(timeToSchedule.time), 'MMMM dd, yyyy')}!`
+                                `Your time has been reserved for ${dateFormat(fromUnixTime(timeToSchedule), 'hh:mm a')} on${' '}
+                                ${dateFormat(fromUnixTime(timeToSchedule), 'MMMM dd, yyyy')}!`
                             :
-                                `What would you like to cover on${" "}
-                                ${dateFormat(fromUnixTime(timeToSchedule.time), 'MMMM dd, yyyy')}${" "}
-                                at ${dateFormat(fromUnixTime(timeToSchedule.time), 'hh:mm a')}?`
+                                `What would you like to cover on${' '}
+                                ${dateFormat(fromUnixTime(timeToSchedule), 'MMMM dd, yyyy')}${' '}
+                                at ${dateFormat(fromUnixTime(timeToSchedule), 'hh:mm a')}?`
                         :
                             error
                         }
@@ -233,9 +222,9 @@ const Calendar = () => {
                         ref={inputRef}
                         opacity={loading ? '.5' : ''}
                         onChange={handleInput}
-                        value={topic[timeToSchedule._id]}
+                        value={topic[timeToSchedule]}
                         type='text'
-                        name={timeToSchedule._id}
+                        name={timeToSchedule}
                         placeholder='Topic to cover'
                         />
                     }
@@ -247,7 +236,7 @@ const Calendar = () => {
                             />
                         :
                             <>
-                                {!timeScheduled &&
+                                {!timeScheduled && !error &&
                                     <Button
                                     margin='0 15px 0 0'
                                     onClick={() => requestScheduledTime(timeToSchedule)}
@@ -262,7 +251,8 @@ const Calendar = () => {
                                     setTopic();
                                     setSelectedTime();
                                     setTimeScheduled();
-                                    setRefresh(!refresh)
+                                    setRefresh(!refresh);
+                                    setError();
                                 }}
                                 bgColor='#ba0c2f'
                                 >
@@ -349,12 +339,12 @@ const Calendar = () => {
 
                             <PopulateCalendar
                             selectedMonth={selectedMonth}
-                            availableDays={availableDays}
                             userType={userType}
                             currentInstructor={currentInstructor}
                             setDateClicked={setDateClicked}
                             user={user}
                             error={modal}
+                            availability={availability}
                             />
                         </>
                     : dateClicked &&
@@ -384,8 +374,8 @@ const Calendar = () => {
                             scheduleTime={scheduleTime}
                             addTimeToSchedule={addTimeToSchedule}
                             userType={userType}
-                            availableDays={availableDays}
                             currentInstructor={currentInstructor}
+                            availability={availability}
                             />
                         </>
                     :
